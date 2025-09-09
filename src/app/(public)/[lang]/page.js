@@ -19,6 +19,7 @@ export default async function Home({ params }) {
   // 2. Obtenemos el diccionario y los trabajos. Esto ahora funciona correctamente.
   const dict = await getDictionary(params.lang);
   const jobs = await getPublicJobs(params.lang);
+  
 
   return (
     <>
