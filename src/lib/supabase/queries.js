@@ -21,9 +21,7 @@ export async function getSiteInfo() {
 }
 
 
-// NUEVA FUNCIÓN: Obtiene las ofertas de empleo públicas y activas
 export async function getPublicJobs(language = 'es') {
-  // Asegurarse de que language sea 'es' o 'en' para evitar errores.
   const lang = ['es', 'en'].includes(language) ? language : 'es';
 
   const { data, error } = await supabase
@@ -36,14 +34,14 @@ export async function getPublicJobs(language = 'es') {
       salary_range_min,
       salary_range_max,
       companies ( name )
-      .limit(6);
-    `)
-    .eq('status', 'active');
+    `) // El string del select termina aquí
+    .eq('status', 'active')
+    .order('created_at', { ascending: false }) 
+    .limit(6); 
 
   if (error) {
-    // Esta línea nos dará la pista definitiva.
     console.error('DETALLE COMPLETO DEL ERROR:', error); 
-    return []; // Es buena práctica devolver un array vacío en caso de error.
+    return [];
   }
 
   return data;

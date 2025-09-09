@@ -1,6 +1,7 @@
 // src/app/(public)/[lang]/layout.js
 import Header from '@/components/organisms/Header';
 import Footer from '@/components/organisms/Footer';
+import { getSiteInfo } from '@/lib/supabase/queries';
 
 // Este layout recibe los 'params' de la URL, incluyendo 'lang'
 export default function LangLayout({ children, params }) {
