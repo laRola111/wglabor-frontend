@@ -1,8 +1,7 @@
 // src/app/layout.js
 import './globals.css';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+// 1. Importamos la fuente Geist en lugar de Inter
+import { GeistSans } from 'geist/font/sans';
 
 export const metadata = {
   title: 'WG Labor LLC | Agencia de gestión de trabajadores temporales',
@@ -13,7 +12,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
+      {/* 2. Aplicamos la clase de la nueva fuente al body */}
+      <body className={GeistSans.className}>
         {children}
       </body>
     </html>

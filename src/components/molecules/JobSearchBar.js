@@ -3,11 +3,9 @@
 
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { dictionary as esDict } from '../dictionaries/es';
-// En el futuro, este componente recibirá el diccionario como prop
-const dict = esDict;
 
-export default function JobSearchBar() {
+// El componente ahora recibe el diccionario como prop
+export default function JobSearchBar({ dict }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log('Buscando empleos...');

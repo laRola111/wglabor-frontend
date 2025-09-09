@@ -1,88 +1,65 @@
-import { Suspense } from 'react';
+// src/app/(public)/[lang]/page.js
 import Link from 'next/link';
+import JobSearchBar from '@/components/molecules/JobSearchBar';
+import JobCard from '@/components/molecules/JobCard';
+import { getPublicJobs } from '@/lib/supabase/queries';
+// 1. Importamos la función desde su nueva ubicación centralizada
+import { getDictionary } from '@/lib/dictionaries';
 
-// Este es un ejemplo para probar la configuración
-// En el futuro, usaremos una lógica más robusta para obtener el diccionario
-import { dictionary as esDict } from '../../../dictionaries/es.js';
-import { dictionary as enDict } from '../../../dictionaries/en.js';
-
-// Función para obtener el diccionario basado en la URL
-async function getDictionary(lang) {
-  if (lang === 'en') {
-    return enDict;
-  }
-  return esDict;
-}
-
-// Función que genera metadatos dinámicos
+// La función de metadatos ahora también usa el nuevo import
 export async function generateMetadata({ params }) {
   const dict = await getDictionary(params.lang);
-  
   return {
-    title: dict.home.heroTitle + ' | WG Labor LLC',
+    title: `${dict.home.heroTitle} | WG Labor LLC`,
     description: dict.home.heroSubtitle,
   };
 }
 
 export default async function Home({ params }) {
+  // 2. Obtenemos el diccionario y los trabajos. Esto ahora funciona correctamente.
   const dict = await getDictionary(params.lang);
+  const jobs = await getPublicJobs(params.lang);
 
   return (
-    <div className="bg-dark-background text-dark-text min-h-screen">
-      {/* <header className="py-4 px-8 border-b border-dark-surface">
-        <nav className="flex justify-between items-center">
-          <span className="text-xl font-bold">WGLABOR LLC</span>
-          <div className="flex items-center space-x-4">
-            <Link href="/en" className="text-dark-text-muted hover:underline">
-              English
+    <>
+      {/* Hero Section */}
+      <section className="py-24 px-8 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl font-extrabold text-white leading-tight mb-4">
+            {dict.home.heroTitle}
+          </h1>
+          <p className="text-lg text-dark-text-muted mb-8">
+            {dict.home.heroSubtitle}
+          </p>
+          <JobSearchBar dict={dict} />
+          <div className="mt-4 text-dark-text-muted text-sm">
+            <span>{params.lang === 'es' ? '¿Buscas empleo?' : 'Looking for a job?'} </span>
+            <Link href={`/${params.lang}/jobs`} className="underline hover:no-underline text-accent-primary">
+              {params.lang === 'es' ? 'Ver todas las ofertas' : 'View all openings'}
             </Link>
-            <Link href="/es" className="text-dark-text-muted hover:underline">
-              Español
-            </Link>
-            <button className="bg-accent-primary text-white py-2 px-4 rounded-lg hover:bg-accent-hover transition-colors">
-              Login / Registrarse
-            </button>
           </div>
-        </nav>
-      </header> */}
-
-      <main className="py-24 px-8 text-center max-w-4xl mx-auto">
-        <h1 className="text-5xl font-extrabold text-white leading-tight mb-4">
-          {dict.home.heroTitle}
-        </h1>
-        <p className="text-lg text-dark-text-muted mb-8">
-          {dict.home.heroSubtitle}
-        </p>
-        <div className="bg-dark-surface rounded-xl p-4 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <input
-            type="text"
-            placeholder={dict.home.searchPlaceholder}
-            className="bg-dark-background text-dark-text px-4 py-3 rounded-lg flex-1 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-accent-primary"
-          />
-          <input
-            type="text"
-            placeholder={dict.home.locationPlaceholder}
-            className="bg-dark-background text-dark-text px-4 py-3 rounded-lg flex-1 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-accent-primary"
-          />
-          <button className="bg-accent-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-accent-hover transition-colors w-full sm:w-auto">
-            {dict.home.searchButton}
-          </button>
         </div>
-        <div className="mt-4 text-dark-text-muted text-sm">
-          <span>Looking for a job? </span>
-          <Link href="#" className="underline hover:no-underline">
-            View all openings
-          </Link>
-          <span className="ml-4">Need talent? </span>
-          <Link href="#" className="underline hover:no-underline">
-            Post a job
-          </Link>
-        </div>
-      </main>
+      </section>
 
-      <footer className="text-center text-dark-text-muted text-sm py-4">
-        © 2024 WGLABOR LLC. All rights reserved.
-      </footer>
-    </div>
+      {/* Recent Jobs Section */}
+      <section className="py-16 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-dark-text mb-12">
+            {params.lang === 'es' ? 'Ofertas de Empleo Recientes' : 'Recent Job Openings'}
+          </h2>
+          {jobs && jobs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {jobs.map((job) => (
+                <JobCard key={job.id} job={job} lang={params.lang} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-dark-text-muted">
+              {params.lang === 'es' ? 'No hay ofertas de empleo disponibles en este momento.' : 'No job openings available at the moment.'}
+            </p>
+          )}
+        </div>
+      </section>
+    </>
   );
 }

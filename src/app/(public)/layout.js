@@ -1,11 +1,6 @@
 // src/app/(public)/layout.js
-import Header from '@/components/organisms/Header';
 
+// Este layout ahora es más simple, solo renderiza a sus hijos.
 export default function PublicLayout({ children }) {
-  return (
-    <>
-      <Header />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
