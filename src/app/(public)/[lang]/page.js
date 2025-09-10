@@ -2,24 +2,30 @@
 import Link from 'next/link';
 import JobSearchBar from '@/components/molecules/JobSearchBar';
 import JobCard from '@/components/molecules/JobCard';
-import { getPublicJobs } from '@/lib/supabase/queries';
+import { getRecentJobs } from '@/lib/supabase/queries';
 import { getDictionary } from '@/lib/dictionaries';
+import CompaniesSection from '@/components/organisms/CompaniesSection';
+import TipsSection from '@/components/organisms/TipsSection';
+import ContactSection from '@/components/organisms/ContactSection';
 
-// La función de metadatos ahora también usa el nuevo import
-export async function generateMetadata({ params }) {
-  const dict = await getDictionary(params.lang);
+
+export async function generateMetadata({ params: paramsPromise }) {
+  // 1. "Esperamos" los parámetros para obtener el valor de 'lang'
+  const { lang } = await paramsPromise;
+  const dict = await getDictionary(lang);
   return {
     title: `${dict.home.heroTitle} | WG Labor LLC`,
     description: dict.home.heroSubtitle,
   };
 }
 
-export default async function Home({ params }) {
-  // 2. Obtenemos el diccionario y los trabajos. Esto ahora funciona correctamente.
-  const dict = await getDictionary(params.lang);
-  const jobs = await getPublicJobs(params.lang);
- 
-  
+export default async function Home({ params: paramsPromise }) {
+  // 2. "Esperamos" los params una sola vez al principio
+  const { lang } = await paramsPromise;
+
+  // 3. Usamos la variable 'lang' en todas las llamadas y lógicas
+  const dict = await getDictionary(lang);
+  const jobs = await getRecentJobs(lang);
 
   return (
     <>
@@ -34,9 +40,10 @@ export default async function Home({ params }) {
           </p>
           <JobSearchBar dict={dict} />
           <div className="mt-4 text-dark-text-muted text-sm">
-            <span>{params.lang === 'es' ? '¿Buscas empleo?' : 'Looking for a job?'} </span>
-            <Link href={`/${params.lang}/jobs`} className="underline hover:no-underline text-accent-primary">
-              {params.lang === 'es' ? 'Ver todas las ofertas' : 'View all openings'}
+            {/* 4. Usamos la variable 'lang' resuelta en todo el JSX */}
+            <span>{lang === 'es' ? '¿Buscas empleo?' : 'Looking for a job?'} </span>
+            <Link href={`/${lang}/jobs`} className="underline hover:no-underline text-accent-primary">
+              {lang === 'es' ? 'Ver todas las ofertas' : 'View all openings'}
             </Link>
           </div>
         </div>
@@ -46,21 +53,24 @@ export default async function Home({ params }) {
       <section className="py-16 px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-dark-text mb-12">
-            {params.lang === 'es' ? 'Ofertas de Empleo Recientes' : 'Recent Job Openings'}
+            {lang === 'es' ? 'Ofertas de Empleo Recientes' : 'Recent Job Openings'}
           </h2>
           {jobs && jobs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {jobs.map((job) => (
-                <JobCard key={job.id} job={job} lang={params.lang} />
+                <JobCard key={job.id} job={job} lang={lang} />
               ))}
             </div>
           ) : (
             <p className="text-center text-dark-text-muted">
-              {params.lang === 'es' ? 'No hay ofertas de empleo disponibles en este momento.' : 'No job openings available at the moment.'}
+              {lang === 'es' ? 'No hay ofertas de empleo disponibles en este momento.' : 'No job openings available at the moment.'}
             </p>
           )}
         </div>
       </section>
+      <CompaniesSection dict={dict} lang={lang} />
+      <TipsSection dict={dict} />
+      <ContactSection dict={dict} lang={lang} />
     </>
   );
 }

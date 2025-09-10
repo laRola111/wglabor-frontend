@@ -20,8 +20,7 @@ export async function getSiteInfo() {
   return data.company_info;
 }
 
-
-export async function getPublicJobs(language = 'es') {
+export async function getRecentJobs(language = 'es') {
   const lang = ['es', 'en'].includes(language) ? language : 'es';
 
   const { data, error } = await supabase
@@ -29,10 +28,7 @@ export async function getPublicJobs(language = 'es') {
     .select(`
       id,
       title:title->>${lang}, 
-      description:description->>${lang},
       location,
-      salary_range_min,
-      salary_range_max,
       companies ( name )
     `) // El string del select termina aquí
     .eq('status', 'active')
@@ -45,4 +41,34 @@ export async function getPublicJobs(language = 'es') {
   }
 
   return data;
+}
+
+export async function getPublicJobs(language = 'es', page = 1, pageSize = 20) {
+  const lang = ['es', 'en'].includes(language) ? language : 'es';
+   const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error } = await supabase
+    .from('jobs')
+    .select(`
+      id,
+      location,
+      job_category,
+      employment_type,
+      salary_range_min,
+      salary_range_max,
+      title:title->>${lang}, 
+      description:description->>${lang},
+      companies ( name )
+      `,)
+      // { count: 'exact' })
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    console.error('DETALLE COMPLETO DEL ERROR:', error); 
+    return [];
+  }
+ return data;
 }
