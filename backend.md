@@ -437,3 +437,203 @@ const channel = supabase.channel('notifications-channel')
 * `leads`: `AFTER INSERT` → inserta notificación automática.
 
 ---
+### **Anexo para `backend.md`: Actualización de Galería de Imágenes y Redes Sociales**
+
+````markdown
+## Anexo: Actualizaciones Recientes (v4.1)
+
+Esta sección documenta los cambios arquitectónicos realizados en base al feedback del cliente.
+
+### 1. Re-arquitectura de la Galería de Imágenes
+
+**Cambio Clave:** La funcionalidad de galería de imágenes se ha **movido de las ofertas de empleo a las compañías**.
+
+* **Justificación:** El cliente ha clarificado que la galería de fotos es para mostrar imágenes de la propia compañía (sus proyectos, equipo, etc.) en la landing page y en la sección "Para Empresas", no en cada oferta individual. Esto simplifica el modelo de datos de las ofertas y enriquece el perfil de la compañía.
+* **Impacto en el Backend:**
+    * Se ha **eliminado** la columna `image_urls` de la tabla `jobs`.
+    * Se ha **añadido** una nueva columna `image_gallery` (de tipo `JSONB`) a la tabla `companies`.
+    * Se ha creado un nuevo bucket **público** en Supabase Storage llamado `company_images` para alojar estos archivos.
+
+### 2. Gestión de la Galería de la Compañía (Dashboard)
+
+El flujo para que un administrador añada o elimine imágenes de la galería de una compañía es el siguiente:
+
+#### **Paso 1: Subir una Nueva Imagen**
+
+El frontend se encarga de subir el archivo directamente al bucket `company_images`.
+
+```javascript
+async function uploadCompanyImage(file) {
+  // Crea un nombre de archivo único para evitar colisiones
+  const fileName = `${Date.now()}-${file.name}`;
+  
+  const { data, error } = await supabase
+    .storage
+    .from('company_images') // Bucket público para imágenes de compañías
+    .upload(fileName, file);
+
+  if (error) {
+    console.error('Error al subir la imagen:', error);
+    return null;
+  }
+  
+  // Obtenemos la URL pública para guardarla en la base de datos
+  const { data: { publicUrl } } = supabase
+    .storage
+    .from('company_images')
+    .getPublicUrl(fileName);
+    
+  return publicUrl;
+}
+````
+
+#### **Paso 2: Añadir la URL de la Imagen a la Base de Datos**
+
+Una vez obtenida la `publicUrl` del paso anterior, se debe llamar a la función RPC del backend `add_company_image`.
+
+```javascript
+async function addImageToCompanyGallery(companyId, imageUrl) {
+  const { data: updatedGallery, error } = await supabase.rpc('add_company_image', {
+    p_company_id: companyId,
+    p_image_url: imageUrl
+  });
+  
+  if (error) console.error('Error al añadir imagen a la galería:', error);
+  
+  // La función devuelve el array de imágenes actualizado para refrescar la UI.
+  return updatedGallery; 
+}
+```
+
+#### **Paso 3: Eliminar una Imagen de la Galería**
+
+Para eliminar una imagen, simplemente se llama a la función RPC `remove_company_image`. El backend se encarga de eliminar tanto la referencia en la base de datos como el archivo físico en Supabase Storage.
+
+```javascript
+async function removeImageFromCompanyGallery(companyId, imageUrl) {
+  const { data: updatedGallery, error } = await supabase.rpc('remove_company_image', {
+    p_company_id: companyId,
+    p_image_url: imageUrl
+  });
+
+  if (error) console.error('Error al eliminar la imagen de la galería:', error);
+
+  // La función devuelve el array de imágenes actualizado.
+  return updatedGallery;
+}
+```
+
+### 3\. Mostrar la Galería en la Página Pública
+
+Para mostrar la galería en la landing page, se debe incluir la nueva columna `image_gallery` en la consulta a la tabla `companies`.
+
+```javascript
+async function getCompanyDetails(companyId) {
+  const { data, error } = await supabase
+    .from('companies')
+    .select('name, logo_url, image_gallery') // Pide la nueva columna
+    .eq('id', companyId)
+    .single();
+    
+  // data.image_gallery será un array de URLs listo para usar en un carrusel o grid.
+  return data;
+}
+```
+
+### 4\. Actualización de Redes Sociales
+
+Se han añadido las URLs de TikTok e Instagram a la información del sitio. El objeto `company_info` en la tabla `site_settings` ahora tiene la siguiente estructura en su campo `social_media`:
+
+```json
+{
+  "social_media": {
+    "facebook": "[https://www.facebook.com/](https://www.facebook.com/)...",
+    "instagram": "[https://www.instagram.com/wglaborllc/](https://www.instagram.com/wglaborllc/)",
+    "tiktok": "[https://www.tiktok.com/@wglaborllc](https://www.tiktok.com/@wglaborllc)..."
+  }
+}
+```
+
+### **Extracto para `backend.md` sobre Gestión de Contenido**
+
+````markdown
+### **Gestión de Contenido del Sitio (Admins y Público)**
+
+Esta sección cubre cómo gestionar el contenido dinámico del sitio, como la información de contacto y los textos legales.
+
+#### **Información General del Sitio (`site_settings`)**
+
+```javascript
+// OBTENER la información para el footer, contacto, etc. (Público)
+async function getSiteInfo() {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('company_info')
+    .eq('id', 1)
+    .single();
+  
+  if (error) console.error("Error fetching site info:", error);
+  // Devuelve el objeto JSON: { phone, address, social_media: { ... } }
+  return data?.company_info || null;
+}
+
+// ACTUALIZAR la información desde el dashboard (Admins)
+async function updateSiteSettings(newInfoObject) {
+  // newInfoObject debe ser el objeto JSON completo y actualizado
+  const { data, error } = await supabase
+    .from('site_settings')
+    .update({ company_info: newInfoObject })
+    .eq('id', 1);
+  return { data, error };
+}
+````
+
+#### **Documentos Legales (`legal_documents`)**
+
+```javascript
+// OBTENER un documento legal para mostrarlo en una página pública
+async function getLegalDocument(slug, language = 'es') { 
+  // El 'slug' puede ser 'terms-of-service' o 'privacy-policy'
+  const { data, error } = await supabase
+    .from('legal_documents')
+    .select(`
+      title:title->>${language},
+      content:content->>${language}
+    `)
+    .eq('slug', slug)
+    .single();
+
+  if (error) console.error(`Error fetching legal document: ${slug}`, error);
+  return data; // Devuelve { title: "...", content: "..." }
+}
+
+// OBTENER todos los datos de un documento para el editor del dashboard (Admins)
+async function getLegalDocumentForEditing(slug) {
+    const { data, error } = await supabase
+    .from('legal_documents')
+    .select('id, title, content') // Obtenemos el objeto JSON completo con ambos idiomas
+    .eq('slug', slug)
+    .single();
+  return data;
+}
+
+
+// ACTUALIZAR un documento legal desde el dashboard (Admins)
+async function updateLegalDocument(id, newTitleObject, newContentObject) {
+  // newTitleObject = { es: "...", en: "..." }
+  // newContentObject = { es: "...", en: "..." }
+  const { data, error } = await supabase
+    .from('legal_documents')
+    .update({ 
+        title: newTitleObject, 
+        content: newContentObject,
+        updated_at: new Date().toISOString() // Actualizamos la fecha de modificación
+    })
+    .eq('id', id);
+  return { data, error };
+}
+```
+
+```
+
+

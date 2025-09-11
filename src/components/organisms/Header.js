@@ -1,11 +1,11 @@
-// src/components/organisms/Header.js
+// RUTA: src/components/organisms/Header.js
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi'; // Iconos para el menú
+import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
 
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import logo from "../../../public/WGLABOR-logo-hzt-1.png";
@@ -13,57 +13,84 @@ import logo from "../../../public/WGLABOR-logo-hzt-1.png";
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isSpanish = pathname.startsWith('/es');
+  
+  // Estado para controlar la visibilidad del header
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastYPos, setLastYPos] = useState(0);
 
-  // Bloquea el scroll del body cuando el menú está abierto
+  const isSpanish = pathname.startsWith('/es');
+  const isHomePage = pathname === '/es' || pathname === '/en';
+
+  // Efecto que maneja la visibilidad del header al hacer scroll
   useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    // Función de limpieza para reestablecer el scroll si el componente se desmonta
+    const handleScroll = () => {
+      const currentYPos = window.scrollY;
+      const isScrollingUp = currentYPos < lastYPos;
+
+      // Se muestra si el usuario sube el scroll o si está muy cerca de la parte superior
+      setIsVisible(isScrollingUp || currentYPos < 50); 
+      setLastYPos(currentYPos);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastYPos]);
+
+  // Efecto para bloquear el scroll del body cuando el menú móvil está abierto
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : 'auto';
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [isMenuOpen]);
 
-
+  // Lógica para que el enlace 'Contacto' sea un ancla en el home o un enlace en otras páginas
+  const contactHref = isHomePage ? '#contact' : (isSpanish ? '/es/contact' : '/en/contact');
+  
   const navLinks = isSpanish
     ? [
         { name: 'Buscar Empleos', href: '/es/jobs' },
         { name: 'Para Empresas', href: '/es/companies' },
         { name: 'Tips', href: '/es/resources' },
-        { name: 'Contacto', href: '/es/contact' },
+        { name: 'Contacto', href: contactHref },
       ]
     : [
         { name: 'Find Jobs', href: '/en/jobs' },
         { name: 'For Companies', href: '/en/companies' },
         { name: 'Tips', href: '/en/resources' },
-        { name: 'Contact', href: '/en/contact' },
+        { name: 'Contact', href: contactHref },
       ];
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (href) => {
+    if (href.startsWith('#')) {
+       const targetElement = document.querySelector(href);
+       if(targetElement) {
+         targetElement.scrollIntoView({ behavior: 'smooth' });
+       }
+    }
     setIsMenuOpen(false);
   };
 
   return (
     <>
-      <header className="py-4 px-6 sm:px-8 border-b border-dark-surface bg-dark-background sticky top-0 z-40">
+      <header 
+        className={`py-4 px-6 sm:px-8 border-b border-dark-surface bg-dark-background sticky top-0 z-40 transition-transform duration-300 ease-in-out ${
+          isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
         <nav className="flex justify-between items-center w-full max-w-7xl mx-auto">
-          {/* Logo a la izquierda */}
           <Link href={isSpanish ? '/es' : '/en'} className="flex-shrink-0">
             <Image
               src={logo}
               alt="WGLABOR LLC Logo"
-              width={160} // Ligeramente más pequeño en móvil
+              width={160}
               height={36}
               priority
-              className="sm:w-[180px] sm:h-[30px]" // Tamaño original para pantallas más grandes
+              className="sm:w-[180px] sm:h-[30px]"
             />
           </Link>
 
-          {/* Enlaces de navegación para escritorio */}
           <div className="hidden md:flex justify-center flex-grow space-x-8 text-dark-text-muted text-lg">
             {navLinks.map((link) => (
               <Link
@@ -72,19 +99,24 @@ export default function Header() {
                 className={`hover:text-accent-primary transition-colors duration-300 ${
                   pathname === link.href ? 'text-accent-primary font-semibold' : ''
                 }`}
+                onClick={(e) => {
+                    if(link.href.startsWith('#')) {
+                        e.preventDefault();
+                        handleLinkClick(link.href);
+                    }
+                }}
               >
                 {link.name}
               </Link>
             ))}
           </div>
 
-          {/* Contenedor derecho: Language Switcher (escritorio) y Botón de Menú (móvil) */}
           <div className="flex items-center space-x-4">
              <div className="hidden md:block">
                <LanguageSwitcher />
              </div>
             <button
-              className="md:hidden text-dark-text z-50" // Se oculta en pantallas medianas y grandes
+              className="md:hidden text-dark-text z-50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -102,7 +134,7 @@ export default function Header() {
               <Link
                 key={link.name}
                 href={link.href}
-                onClick={handleLinkClick}
+                onClick={() => handleLinkClick(link.href)}
                 className={`text-2xl text-dark-text-muted hover:text-accent-primary transition-colors ${
                   pathname === link.href ? 'text-accent-primary font-semibold' : ''
                 }`}

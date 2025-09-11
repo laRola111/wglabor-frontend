@@ -1,16 +1,56 @@
-// src/components/organisms/ContactSection.js
-import Link from 'next/link';
-import Button from '../ui/Button';
+// RUTA: src/components/organisms/ContactSection.js (MODIFICADO)
+
+import ContactForm from './ContactForm'; // <-- Importamos el nuevo formulario
 
 export default async function ContactSection({ dict, lang }) {
+
+  const content = {
+    es: {
+      contactTitle: "¿Interesado en nuestros servicios?",
+      contactDescription: "Complete el formulario a continuación y nuestro equipo se pondrá en contacto para discutir cómo podemos ayudar a su empresa.",
+      candidateSupport: "Si eres un candidato buscando soporte, por favor escríbenos a:",
+      supportEmail: "support@wglabor.com",
+      // ... textos para el formulario
+      nameLabel: "Nombre Completo",
+      companyLabel: "Empresa (Opcional)",
+      emailLabel: "Correo Electrónico",
+      messageLabel: "Mensaje",
+      sendButton: "Enviar Mensaje",
+      sending: "Enviando...",
+    },
+    en: {
+      contactTitle: "Interested in our services?",
+      contactDescription: "Complete the form below and our team will get in touch to discuss how we can help your company.",
+      candidateSupport: "If you are a candidate seeking support, please email us at:",
+      supportEmail: "support@wglabor.com",
+      // ... form texts
+      nameLabel: "Full Name",
+      companyLabel: "Company (Optional)",
+      emailLabel: "Email Address",
+      messageLabel: "Message",
+      sendButton: "Send Message",
+      sending: "Sending...",
+    }
+  }
+  
+  const text = content[lang] || content['es'];
+
   return (
-    <section className="bg-dark-surface py-20 px-8 text-center">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-4xl font-bold text-dark-text mb-4">{dict.home.contactTitle}</h2>
-        <p className="text-lg text-dark-text-muted mb-8">{dict.home.contactDescription}</p>
-        <Link href={`/${lang}/contact`}>
-          <Button className="text-lg px-10 py-3">{dict.home.contactButton}</Button>
-        </Link>
+    <section className="relative z-10 py-20 px-8 bg-dark-background">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center">
+            <h2 className="text-4xl font-bold text-dark-text mb-4">{text.contactTitle}</h2>
+            <p className="text-lg text-dark-text-muted mb-12 max-w-2xl mx-auto">{text.contactDescription}</p>
+        </div>
+        
+        <ContactForm dict={text} />
+
+        <div className="text-center mt-12 border-t border-dark-border pt-8">
+            <p className="text-dark-text-muted">{text.candidateSupport}</p>
+            <a href={`mailto:${text.supportEmail}`} className="text-accent-primary font-semibold hover:underline">
+                {text.supportEmail}
+            </a>
+        </div>
       </div>
     </section>
   );
