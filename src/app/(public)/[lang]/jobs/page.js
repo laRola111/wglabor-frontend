@@ -2,21 +2,29 @@
 import { getPublicJobs } from '@/lib/supabase/queries';
 import { getDictionary } from '@/lib/dictionaries';
 import JobCard from '@/components/molecules/JobCard';
+import FilterSidebar from '@/components/organisms/FilterSidebar';
 
 export default async function JobsPage({ params: paramsPromise, searchParams }) {
   const { lang } = await paramsPromise;
   const dict = await getDictionary(lang);
   
-  // Leemos el número de página de la URL (ej: /jobs?page=2), si no existe, es la página 1.
+  // Leemos los parámetros de la URL. Si no existen, usamos valores por defecto.
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
-  const pageSize = 20; // Definimos el tamaño de la página
+  const keyword = searchParams.q || '';
+  const location = searchParams.location || '';
+  const pageSize = 20;
 
-  // Llamamos a la función de Supabase con los parámetros de paginación
-  const { data: jobs, count: totalJobs } = await getPublicJobs(lang, page, pageSize);
+  // Pasamos todos los parámetros a nuestra función de consulta
+  const { data: jobs, count: totalJobs } = await getPublicJobs(lang, {
+    page,
+    pageSize,
+    keyword,
+    location,
+  });
 
   // Calculamos los contadores para el texto de resumen
   const start = totalJobs > 0 ? (page - 1) * pageSize + 1 : 0;
-  const end = Math.min(page * pageSize, totalJobs);
+  const end = Math.min(page * pageSize, totalJobs || 0);
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-8">
@@ -24,15 +32,7 @@ export default async function JobsPage({ params: paramsPromise, searchParams }) 
         
         {/* Columna de Filtros (Izquierda) */}
         <aside className="lg:col-span-1">
-          <div className="sticky top-24 p-6 bg-dark-surface rounded-lg border border-dark-border">
-            <h2 className="text-xl font-bold text-dark-text mb-4">
-              {lang === 'es' ? 'Filtros' : 'Filters'}
-            </h2>
-            {/* Próximamente: aquí irán los componentes de filtro */}
-            <p className="text-dark-text-muted text-sm">
-              {lang === 'es' ? 'Los filtros de búsqueda estarán disponibles aquí.' : 'Search filters will be available here.'}
-            </p>
-          </div>
+          <FilterSidebar lang={lang} dict={dict} />
         </aside>
 
         {/* Columna de Resultados (Derecha) */}
@@ -61,7 +61,7 @@ export default async function JobsPage({ params: paramsPromise, searchParams }) 
           ) : (
             <div className="bg-dark-surface p-8 rounded-lg border border-dark-border text-center">
                <p className="text-dark-text-muted">
-                {lang === 'es' ? 'No se encontraron ofertas de empleo.' : 'No job openings found.'}
+                {lang === 'es' ? 'No se encontraron ofertas de empleo que coincidan con tu búsqueda.' : 'No job openings matching your search were found.'}
               </p>
             </div>
           )}

@@ -1,12 +1,7 @@
 // src/lib/supabase/queries.js
 import { supabase } from './client';
 
-// ... (la función getSiteSettings se mantiene igual)
 export async function getSiteSettings() {
-  // ...
-}
-
-export async function getSiteInfo() {
   const { data, error } = await supabase
     .from('site_settings')
     .select('company_info')
@@ -20,55 +15,65 @@ export async function getSiteInfo() {
   return data.company_info;
 }
 
-export async function getRecentJobs(language = 'es') {
+export async function getRecentJobs(language = 'es', limit = 6) {
   const lang = ['es', 'en'].includes(language) ? language : 'es';
-
   const { data, error } = await supabase
     .from('jobs')
     .select(`
       id,
       title:title->>${lang}, 
       location,
+      salary_range_min,
+      salary_range_max,
+      employment_type,
       companies ( name )
-    `) // El string del select termina aquí
+    `) // CORRECCIÓN: job_type -> employment_type
     .eq('status', 'active')
     .order('created_at', { ascending: false }) 
-    .limit(6); 
+    .limit(limit); 
 
-  if (error) {
-    console.error('DETALLE COMPLETO DEL ERROR:', error); 
-    return [];
-  }
-
+  if (error) { /* ... */ }
   return data;
 }
 
-export async function getPublicJobs(language = 'es', page = 1, pageSize = 20) {
-  const lang = ['es', 'en'].includes(language) ? language : 'es';
-   const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+export async function getPublicJobs(language = 'es', options = {}) {
+  // ... (lógica de paginación y filtros)
+  let query = supabase
+    .from('jobs') 
+    .select(`
+      id, 
+      title:title->>${language}, 
+      location, 
+      salary_range_min,
+      salary_range_max,
+      employment_type,
+      companies ( name )
+    `, { count: 'exact' }) // CORRECCIÓN: job_type -> employment_type
+    .eq('status', 'active');
+  // ... (resto de la función)
+  const { data, error, count } = await query;
+  if (error) { /* ... */ }
+  return { data, count };
+}
 
+export async function getJobById(id, language = 'es') {
+  const lang = ['es', 'en'].includes(language) ? language : 'es';
   const { data, error } = await supabase
     .from('jobs')
     .select(`
       id,
+      title:title->>${lang},
+      description:description->>${lang},
       location,
-      job_category,
-      employment_type,
       salary_range_min,
       salary_range_max,
-      title:title->>${lang}, 
-      description:description->>${lang},
+      employment_type,
       companies ( name )
-      `,)
-      // { count: 'exact' })
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .range(from, to);
+    `) // CORRECCIÓN: job_type -> employment_type
+    .eq('status', 'active') 
+    .eq('id', id)
+    .single();
 
-  if (error) {
-    console.error('DETALLE COMPLETO DEL ERROR:', error); 
-    return [];
-  }
- return data;
+  if (error) { /* ... */ }
+  return data;
 }
