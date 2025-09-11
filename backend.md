@@ -341,3 +341,132 @@ export default function DashboardHeader() {
   return (/* ... tu JSX aquí ... */);
 }
 ```
+
+# Guía de Integración Backend (Supabase) para WG Labor
+
+**Versión: 4.0 (Definitiva)**
+
+Este documento es la **fuente única de verdad** para la integración entre el frontend de Next.js y el backend de Supabase.
+
+## 1. Alcance y Flujo de Datos
+
+* **Página Pública:** Muestra ofertas y captura `leads` a través de un formulario.
+* **Dashboard (Acceso Restringido):**
+    * Gestiona un pipeline de `leads` (Nuevos -> Contactados -> Convertidos).
+    * **Convierte** un `lead` en una `empresa` oficial.
+    * Gestiona las `empresas` (CRUD).
+    * Gestiona las `ofertas de empleo` (CRUD) asociadas a las empresas.
+    * Visualiza las `postulaciones` de los candidatos.
+    * Edita el contenido del sitio (`site_settings`, `legal_documents`).
+* **Usuarios:** El registro está deshabilitado. Solo existen los roles `super_admin` y `agency_admin`.
+
+## 2. Configuración y Autenticación
+
+(Esta sección se mantiene igual que en la versión 3.0: `.env.local`, cliente Supabase, `signIn`, `signOut`, recuperación de contraseña).
+
+## 3. Consultas y Mutaciones (API del Frontend)
+
+Aquí se detallan todas las funciones que el frontend necesita para operar.
+
+### **Gestión de Contenido del Sitio (Admins)**
+
+```javascript
+// Actualizar la información general del sitio (footer, contacto, etc.)
+async function updateSiteSettings(newInfoObject) {
+  // newInfoObject debe ser el objeto JSON completo
+  const { data, error } = await supabase
+    .from('site_settings')
+    .update({ company_info: newInfoObject })
+    .eq('id', 1);
+  return { data, error };
+}
+
+// Obtener un documento legal para mostrarlo públicamente
+async function getLegalDocument(slug, language = 'es') { // slug: 'terms-of-service' o 'privacy-policy'
+  const { data, error } = await supabase
+    .from('legal_documents')
+    .select(`title:title->>${language}, content:content->>${language}`)
+    .eq('slug', slug)
+    .single();
+  return data;
+}
+
+// Actualizar un documento legal (Admins)
+async function updateLegalDocument(id, newTitleObject, newContentObject) {
+  const { data, error } = await supabase
+    .from('legal_documents')
+    .update({ title: newTitleObject, content: newContentObject })
+    .eq('id', id);
+  return { data, error };
+}
+```
+
+### **Gestión de Empresas (Admins)**
+
+```javascript
+// Crear una nueva compañía
+async function createCompany(companyData) {
+  // companyData = { name, contact_email, logo_url, ... }
+  const { data, error } = await supabase.from('companies').insert([companyData]).select().single();
+  return { data, error };
+}
+
+// Actualizar una compañía
+async function updateCompany(companyId, updatedData) {
+  const { data, error } = await supabase.from('companies').update(updatedData).eq('id', companyId);
+  return { data, error };
+}
+
+// Eliminar una compañía
+async function deleteCompany(companyId) {
+  const { error } = await supabase.from('companies').delete().eq('id', companyId);
+  return { error };
+}
+```
+
+### **Gestión de Postulaciones (No Candidatos)**
+
+**Aclaración de Alcance:** En V1, no gestionamos perfiles de "candidatos", sino "postulaciones" individuales.
+
+```javascript
+// Obtener todas las postulaciones
+async function getAllApplications() {
+  const { data, error } = await supabase
+    .from('applications')
+    .select('*, jobs(title), companies(name)') // Ejemplo de consulta con joins
+    .order('created_at', { ascending: false });
+  return data;
+}
+
+// Obtener una postulación por ID
+async function getApplicationById(applicationId) {
+  const { data, error } = await supabase
+    .from('applications')
+    .select('*, jobs(*, companies(*))') // Traer toda la información anidada
+    .eq('id', applicationId)
+    .single();
+  return data;
+}
+```
+
+### **Flujo de Conversión de Lead a Empresa (Función Clave)**
+
+Este es el proceso para promover un lead a cliente.
+
+```javascript
+// Llama a la función de base de datos 'convert_lead_to_company'
+async function convertLeadToCompany(leadId) {
+  const { data: newCompanyId, error } = await supabase.rpc('convert_lead_to_company', {
+    p_lead_id: leadId
+  });
+
+  if (error) {
+    console.error('Error al convertir el lead:', error);
+    return null;
+  }
+  
+  // La función devuelve el ID de la nueva compañía creada
+  console.log(`Lead ${leadId} convertido a Compañía con ID: ${newCompanyId}`);
+  return newCompanyId;
+}
+```
