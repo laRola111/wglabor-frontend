@@ -24,5 +24,8 @@ export const dictionary = {
     showingResults: "Showing {start}-{end} of {total} jobs",
     sort: "Sort by:",
     mostRelevant: "Most Relevant",
+  },
+  footer: {
+    adminLogin: "Admin Login",
   }
 };

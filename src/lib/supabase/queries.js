@@ -77,3 +77,34 @@ export async function getJobById(id, language = 'es') {
   if (error) { /* ... */ }
   return data;
 }
+
+// src/lib/supabase/queries.js
+
+// ... (las otras funciones se mantienen igual)
+
+export async function getUserProfile(userId) {
+  console.log('--- DENTRO DE getUserProfile ---');
+  console.log('Buscando perfil para el userId:', userId); // Log para ver el ID que llega
+
+  if (!userId) return null;
+
+  // TEMPORALMENTE quitamos .single() para que la consulta no falle
+  // y nos devuelva un array con todo lo que encuentre.
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', userId);
+
+  // Log para ver la respuesta cruda de Supabase
+  console.log('Respuesta de Supabase (datos):', data);
+  console.log('Respuesta de Supabase (error):', error);
+  
+  if (error) {
+    console.error('Error en la consulta a Supabase:', error.message);
+    return null;
+  }
+
+  // Para que la página no se rompa, devolvemos el primer elemento del array.
+  // Si 'data' es un array con más de un objeto, esta es la causa del error original.
+  return data ? data[0] : null;
+}
