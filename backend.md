@@ -1,472 +1,439 @@
+# Guía de Integración Backend (Supabase) – WG Labor
 
-# Guía de Integración Backend (Supabase) para WG Labor
+**Versión:** 3.1 (Unificada y Auditada)
+**Autor:** Kerno – Arquitecto Principal de Soluciones
 
-**Versión: 3.0 (Definitiva)**
-**Autor:** Kerno, Arquitecto Principal de Soluciones
+Este documento es la **fuente única de verdad** para la integración entre el frontend (Next.js) y el backend (Supabase). Incluye la implementación oficial, las adiciones del dashboard y los hallazgos de auditoría más recientes (2025-09-11).
 
-Este documento es la **fuente única de verdad** para la integración entre el frontend de Next.js y el backend de Supabase. Ha sido actualizado para incluir todas las funcionalidades, correcciones de seguridad y flujos de trabajo avanzados.
+---
 
-## 1\. El Principio Fundamental: Confía en el Backend
+## 1. Principio Fundamental: Confía en el Backend
 
-La arquitectura está diseñada bajo un principio de **"Base de Datos Inteligente"**. Toda la lógica de seguridad (quién puede ver/hacer qué) está gestionada por Row Level Security (RLS) en Supabase.
+La arquitectura sigue el principio de **"Base de Datos Inteligente"**:
 
-**Directiva para el Frontend:** Su única responsabilidad es **solicitar los datos**. No implementen lógica de permisos en el cliente. Usen el estado de autenticación (`session`) únicamente para mejorar la UI (ej. mostrar/ocultar botones), pero confíen en que el backend aplicará la seguridad real en cada llamada.
+* Toda la lógica de seguridad se gestiona con **Row Level Security (RLS)** en Supabase.
+* El frontend **solo solicita datos**. No debe implementar lógica de permisos.
+* El estado de sesión (`session`) solo se usa para mejorar la UI (mostrar/ocultar botones).
 
-## 2\. Configuración Inicial
+---
 
-El archivo `.env.local` debe contener:
+## 2. Alcance General y Flujo de Datos
+
+* **Página Pública:**
+
+  * Muestra ofertas de empleo.
+  * Captura `leads` mediante un formulario.
+
+* **Dashboard (Acceso Restringido):**
+
+  * Gestiona pipeline de leads (Nuevos → Contactados → Convertidos).
+  * Convierte un `lead` en `empresa` oficial.
+  * CRUD de empresas y ofertas de empleo.
+  * Visualización de postulaciones y descarga segura de CVs.
+  * Edición de contenido del sitio (`site_settings`, `legal_documents`).
+
+* **Usuarios:**
+
+  * Registro deshabilitado.
+  * Roles disponibles: `super_admin`, `agency_admin`.
+
+---
+
+## 3. Configuración Inicial
+
+En el archivo `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL="https://fghilqtcpxqlmbhpuboc.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="[Pega tu clave anon aquí]"
 ```
 
-El cliente de Supabase se inicializa en `src/lib/supabase/client.js`.
+Cliente de Supabase inicializado en `src/lib/supabase/client.js`.
 
-## 3\. Autenticación y Gestión de Sesión
+---
 
-El registro público está deshabilitado. Solo existen dos roles de administrador.
+## 4. Autenticación y Sesión
 
-**Usuarios:**
+Roles definidos:
 
-  * **Agency Admin (Cliente):** `info@wglaborllc.com` / `[contraseña]`
-  * **Super Admin (Soporte):** `[tu_email_de_admin]` / `[contraseña]`
+* **Agency Admin (Cliente):** `info@wglaborllc.com` / `[contraseña]`
+* **Super Admin (Soporte):** `[tu_email_de_admin]` / `[contraseña]`
 
-#### Iniciar y Cerrar Sesión
+#### Iniciar y cerrar sesión
 
 ```javascript
-// Iniciar Sesión
 async function signIn(email, password) {
   return await supabase.auth.signInWithPassword({ email, password });
 }
 
-// Cerrar Sesión
 async function signOut() {
   return await supabase.auth.signOut();
 }
 ```
 
-#### Recuperación de Contraseña (Flujo Completo)
+#### Recuperación de contraseña
 
-1.  **Página "Olvidé mi Contraseña":**
-    ```javascript
-    async function requestPasswordReset(email) {
-      const redirectURL = `${window.location.origin}/update-password`;
-      return await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectURL });
-    }
-    ```
-2.  **Página `/update-password`:** Esta página se renderiza cuando el usuario llega desde el enlace de su correo.
-    ```javascript
-    // Esta función se llama cuando el componente se monta para manejar el token
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event == "PASSWORD_RECOVERY") {
-        // Aquí puedes mostrar el formulario para la nueva contraseña
-      }
-    });
+1. **Solicitud de reseteo:**
 
-    async function updateUserPassword(newPassword) {
-      const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-      if (!error) { /* Redirigir al login */ }
-    }
-    ```
+```javascript
+async function requestPasswordReset(email) {
+  const redirectURL = `${window.location.origin}/update-password`;
+  return await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectURL });
+}
+```
 
-## 4\. Endpoints Públicos (Landing Page)
+2. **Actualización en `/update-password`:**
 
-Estas consultas funcionan sin necesidad de que el usuario inicie sesión.
+```javascript
+supabase.auth.onAuthStateChange(async (event) => {
+  if (event === "PASSWORD_RECOVERY") {
+    // mostrar formulario
+  }
+});
 
-#### Obtener Información del Sitio (Footer/Contacto)
+async function updateUserPassword(newPassword) {
+  return await supabase.auth.updateUser({ password: newPassword });
+}
+```
 
-Obtiene los datos de la tabla `site_settings`.
+---
+
+## 5. Endpoints Públicos
+
+#### Información del sitio
 
 ```javascript
 async function getSiteInfo() {
-  const { data, error } = await supabase
-    .from('site_settings')
-    .select('company_info')
-    .eq('id', 1)
-    .single();
-  
-  if (error) console.error("Error fetching site info:", error);
-  return data?.company_info || null;
+  return await supabase.from('site_settings').select('company_info').eq('id', 1).single();
 }
 ```
 
-#### Obtener Ofertas de Empleo para la Página Principal
-
-Obtiene las 6 ofertas activas más recientes.
+#### Ofertas de empleo recientes
 
 ```javascript
 async function getPublicJobs(language = 'es') {
-  const lang = ['es', 'en'].includes(language) ? language : 'es';
-
-  const { data, error } = await supabase
+  const lang = ['es','en'].includes(language) ? language : 'es';
+  return await supabase
     .from('jobs')
-    .select(`
-      id,
-      title:title->>${lang},
-      location,
-      companies ( name, logo_url )
-    `)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
+    .select(`id, title:title->>${lang}, location, companies(name, logo_url)`)
+    .eq('status','active')
+    .order('created_at',{ ascending:false })
     .limit(6);
-
-  if (error) console.error('Error fetching public jobs:', error);
-  return data || [];
 }
 ```
 
-## 5\. Dashboard: Gestión de Empresas (Leads)
-
-El formulario de "Para Empresas" crea un nuevo `lead`.
-
-#### Crear un Nuevo Lead
-
-Esta función puede ser llamada por un usuario anónimo. La política RLS lo permite.
+#### Crear lead (anónimo permitido)
 
 ```javascript
 async function createLead(leadData) {
-  // leadData = { company_name, contact_name, email, phone, message }
-  const { data, error } = await supabase.from('leads').insert([leadData]);
-  if (error) console.error('Error creating lead:', error);
-  return { data, error };
+  return await supabase.from('leads').insert([leadData]);
 }
 ```
 
-#### Obtener y Actualizar Leads (Solo Admins)
+---
 
-El dashboard mostrará los leads y permitirá su seguimiento.
+## 6. Dashboard: Leads y Empresas
+
+#### Leads
 
 ```javascript
-// Obtener todos los leads
 async function getAllLeads() {
-  const { data, error } = await supabase
-    .from('leads')
-    .select('*')
-    .order('created_at', { ascending: false });
-  return data;
+  return await supabase.from('leads').select('*').order('created_at',{ ascending:false });
 }
 
-// Actualizar un lead (ej. cambiar estado o añadir una nota)
 async function updateLead(leadId, newStatus, newNote) {
-  // 1. Obtener el lead actual
   const { data: lead } = await supabase.from('leads').select('notes').eq('id', leadId).single();
-  if (!lead) return;
-
-  // 2. Preparar la nueva nota
-  const noteEntry = {
-    author: "Admin Name", // Obtener del perfil del admin logueado
-    note: newNote,
-    date: new Date().toISOString()
-  };
-
-  // 3. Actualizar
-  const { data, error } = await supabase
-    .from('leads')
-    .update({
-      status: newStatus,
-      notes: [...lead.notes, noteEntry] // Añade la nueva nota al array existente
-    })
-    .eq('id', leadId);
+  const noteEntry = { author: "Admin Name", note: newNote, date: new Date().toISOString() };
+  return await supabase.from('leads').update({ status:newStatus, notes:[...lead.notes,noteEntry]}).eq('id',leadId);
 }
 ```
 
-## 6\. Dashboard: Gestión de Ofertas (CRUD Completo)
+#### Empresas
 
-#### Crear/Actualizar una Oferta
+```javascript
+async function createCompany(companyData) {
+  return await supabase.from('companies').insert([companyData]).select().single();
+}
 
-El objeto que se envía a Supabase debe incluir los nuevos campos.
+async function updateCompany(companyId, updatedData) {
+  return await supabase.from('companies').update(updatedData).eq('id', companyId);
+}
+
+async function deleteCompany(companyId) {
+  return await supabase.from('companies').delete().eq('id', companyId);
+}
+```
+
+#### Conversión de lead a empresa
+
+```javascript
+async function convertLeadToCompany(leadId) {
+  return await supabase.rpc('convert_lead_to_company',{ p_lead_id: leadId });
+}
+```
+
+---
+
+## 7. Dashboard: Ofertas (CRUD)
 
 ```javascript
 async function saveJob(jobData) {
-  // jobData debe incluir: id (para actualizar), company_id, status, location,
-  // zip_code, salary_range_min, salary_range_max,
-  // title: { es: "...", en: "..." },
-  // description: { es: "...", en: "..." },
-  // image_urls: ["url1.jpg", "url2.jpg"] // Array de strings, puede estar vacío []
-  
-  const { data, error } = await supabase
-    .from('jobs')
-    .upsert(jobData)
-    .select();
-    
-  return { data, error };
+  return await supabase.from('jobs').upsert(jobData).select();
 }
 ```
 
-## 7\. Dashboard: Gestión de Postulaciones y CVs
+---
 
-Este es un flujo de **alta seguridad**.
+## 8. Dashboard: Postulaciones y CVs
 
-#### Obtener Postulaciones de una Oferta
+#### Obtener postulaciones
 
 ```javascript
 async function getApplicationsForJob(jobId) {
-  const { data, error } = await supabase
-    .from('applications')
-    .select('*')
-    .eq('job_id', jobId);
-  return data;
+  return await supabase.from('applications').select('*').eq('job_id', jobId);
 }
 ```
 
-#### **Descargar un CV (Flujo de URL Segura)**
+#### Descarga segura de CV
 
-No se puede usar la `resume_url` directamente. Se debe solicitar una URL temporal y segura.
-
-**Paso 1: Crear una Función de Servidor (RPC) en Supabase**
-Ejecuta esto una vez en el `SQL Editor` de Supabase para crear la función que genera la URL.
-
-```sql
-CREATE OR REPLACE FUNCTION get_signed_resume_url(path_to_file TEXT)
-RETURNS TEXT AS $$
-DECLARE
-  role_name TEXT;
-BEGIN
-  -- Usamos la función segura para verificar el rol del usuario actual
-  SELECT public.get_my_role() INTO role_name;
-
-  -- Solo los administradores pueden generar URLs firmadas
-  IF role_name IN ('super_admin', 'agency_admin') THEN
-    RETURN (
-      SELECT sign(
-        'resumes', -- Nombre del bucket privado
-        path_to_file,
-        300 -- La URL expira en 300 segundos (5 minutos)
-      ) FROM storage.objects
-    );
-  ELSE
-    -- Si no es admin, devuelve NULL o un error
-    RETURN NULL;
-  END IF;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-**Paso 2: Llamar a esta función desde el Frontend**
-En el dashboard, cuando un admin haga clic en "Descargar CV":
+* **RPC en Supabase:** `get_signed_resume_url(path_to_file TEXT)`
+* Genera una URL firmada válida por 5 minutos.
+* Solo accesible para `super_admin` y `agency_admin`.
 
 ```javascript
 async function getSecureResumeUrl(filePath) {
-  const { data, error } = await supabase.rpc('get_signed_resume_url', {
-    path_to_file: filePath
-  });
-
-  if (error) console.error('Error getting signed URL:', error);
-  // 'data' contendrá la URL segura y temporal, lista para usarse en un enlace <a>
-  return data;
+  return await supabase.rpc('get_signed_resume_url',{ path_to_file:filePath });
 }
 ```
 
-## 8\. Notificaciones en Tiempo Real (La Campanita)
+---
 
-Esto permite que el dashboard se actualice sin recargar la página.
-
-**Paso 1: Habilitar la Replicación (Hecho una vez)**
-Asegúrate de que la replicación esté **activada** para las tablas `notifications`, `leads` y `applications` en el dashboard de Supabase (`Database` \> `Replication`).
-
-**Paso 2: Escuchar las Notificaciones en el Frontend**
-En un componente principal del dashboard (como el Header), usa `useEffect` para suscribirte.
+## 9. Dashboard: Contenido del Sitio
 
 ```javascript
-// En un componente cliente como DashboardHeader.js
-'use client';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
-
-export default function DashboardHeader() {
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [user, setUser] = useState(null);
-
-  // Obtener usuario y notificaciones iniciales
-  useEffect(() => {
-    async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (user) {
-        const { data, count } = await supabase
-          .from('notifications')
-          .select('*', { count: 'exact' })
-          .eq('user_id', user.id)
-          .eq('is_read', false);
-        
-        if (data) setNotifications(data);
-        if (count) setUnreadCount(count);
-      }
-    }
-    fetchData();
-  }, []);
-
-  // Escuchar en tiempo real
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('notifications-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}` // Escucha solo para el usuario actual
-        },
-        (payload) => {
-          console.log('Nueva notificación:', payload.new);
-          setNotifications(current => [payload.new, ...current]);
-          setUnreadCount(count => count + 1);
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  // Función para marcar como leídas
-  const markAsRead = async (notificationId) => {
-    await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', notificationId);
-      
-    // Actualizar UI
-    setUnreadCount(count => count - 1);
-  };
-
-  // Renderiza la campanita con el 'unreadCount' y la lista de 'notifications'
-  return (/* ... tu JSX aquí ... */);
-}
-```
-
-# Guía de Integración Backend (Supabase) para WG Labor
-
-**Versión: 4.0 (Definitiva)**
-
-Este documento es la **fuente única de verdad** para la integración entre el frontend de Next.js y el backend de Supabase.
-
-## 1. Alcance y Flujo de Datos
-
-* **Página Pública:** Muestra ofertas y captura `leads` a través de un formulario.
-* **Dashboard (Acceso Restringido):**
-    * Gestiona un pipeline de `leads` (Nuevos -> Contactados -> Convertidos).
-    * **Convierte** un `lead` en una `empresa` oficial.
-    * Gestiona las `empresas` (CRUD).
-    * Gestiona las `ofertas de empleo` (CRUD) asociadas a las empresas.
-    * Visualiza las `postulaciones` de los candidatos.
-    * Edita el contenido del sitio (`site_settings`, `legal_documents`).
-* **Usuarios:** El registro está deshabilitado. Solo existen los roles `super_admin` y `agency_admin`.
-
-## 2. Configuración y Autenticación
-
-(Esta sección se mantiene igual que en la versión 3.0: `.env.local`, cliente Supabase, `signIn`, `signOut`, recuperación de contraseña).
-
-## 3. Consultas y Mutaciones (API del Frontend)
-
-Aquí se detallan todas las funciones que el frontend necesita para operar.
-
-### **Gestión de Contenido del Sitio (Admins)**
-
-```javascript
-// Actualizar la información general del sitio (footer, contacto, etc.)
 async function updateSiteSettings(newInfoObject) {
-  // newInfoObject debe ser el objeto JSON completo
-  const { data, error } = await supabase
-    .from('site_settings')
-    .update({ company_info: newInfoObject })
-    .eq('id', 1);
-  return { data, error };
+  return await supabase.from('site_settings').update({ company_info:newInfoObject }).eq('id',1);
 }
 
-// Obtener un documento legal para mostrarlo públicamente
-async function getLegalDocument(slug, language = 'es') { // slug: 'terms-of-service' o 'privacy-policy'
-  const { data, error } = await supabase
-    .from('legal_documents')
+async function getLegalDocument(slug, language='es') {
+  return await supabase.from('legal_documents')
     .select(`title:title->>${language}, content:content->>${language}`)
-    .eq('slug', slug)
-    .single();
-  return data;
+    .eq('slug',slug).single();
 }
 
-// Actualizar un documento legal (Admins)
-async function updateLegalDocument(id, newTitleObject, newContentObject) {
-  const { data, error } = await supabase
-    .from('legal_documents')
-    .update({ title: newTitleObject, content: newContentObject })
-    .eq('id', id);
-  return { data, error };
+async function updateLegalDocument(id,newTitleObject,newContentObject) {
+  return await supabase.from('legal_documents').update({
+    title:newTitleObject, content:newContentObject
+  }).eq('id',id);
 }
 ```
 
-### **Gestión de Empresas (Admins)**
+---
+
+## 10. Notificaciones en Tiempo Real
+
+* Replicación habilitada en `notifications`, `leads`, `applications`.
+* Suscripción en frontend:
 
 ```javascript
-// Crear una nueva compañía
-async function createCompany(companyData) {
-  // companyData = { name, contact_email, logo_url, ... }
-  const { data, error } = await supabase.from('companies').insert([companyData]).select().single();
-  return { data, error };
-}
-
-// Actualizar una compañía
-async function updateCompany(companyId, updatedData) {
-  const { data, error } = await supabase.from('companies').update(updatedData).eq('id', companyId);
-  return { data, error };
-}
-
-// Eliminar una compañía
-async function deleteCompany(companyId) {
-  const { error } = await supabase.from('companies').delete().eq('id', companyId);
-  return { error };
-}
+const channel = supabase.channel('notifications-channel')
+  .on('postgres_changes',{
+    event:'INSERT', schema:'public', table:'notifications',
+    filter:`user_id=eq.${user.id}`
+  }, (payload) => { /* actualizar estado */ })
+  .subscribe();
 ```
 
-### **Gestión de Postulaciones (No Candidatos)**
+---
 
-**Aclaración de Alcance:** En V1, no gestionamos perfiles de "candidatos", sino "postulaciones" individuales.
+## 11. Automatización del Backend (Triggers)
+
+* **jobs → BEFORE UPDATE → set\_jobs\_timestamp**
+
+  * Actualiza `updated_at` automáticamente.
+
+* **leads → AFTER INSERT → on\_new\_lead\_notification**
+
+  * Inserta registro en `notifications` para alertar a admins.
+
+---
+
+## 12. Tablas Adicionales
+
+* **company\_members**
+
+  * Tabla pivote `profiles ↔ companies`.
+  * Columnas: `company_id`, `user_id`, `role` (`owner`, `member`).
+  * Preparada para permisos granulares en futuras versiones.
+
+
+---
+
+## 13. Estrategia de Seguridad (Row Level Security - RLS)
+
+Esta sección detalla las políticas de seguridad que garantizan que los datos solo sean accesibles por los usuarios correctos. Todas las tablas con datos sensibles deben tener RLS habilitado y políticas definidas.
+
+**Confirmar siempre estas políticas con la salida del script de auditoría SQL.**
+
+* **Tabla `profiles`**
+    * **RLS Habilitado:** Sí
+    * **Políticas:**
+        * `SELECT`: Los usuarios solo pueden ver su propio perfil (`auth.uid() = id`).
+        * `UPDATE`: Los usuarios solo pueden actualizar su propio perfil (`auth.uid() = id`).
+
+* **Tabla `jobs`**
+    * **RLS Habilitado:** Sí
+    * **Políticas:**
+        * `SELECT`: El acceso es público (`true`) para que todos puedan ver las ofertas. Las consultas del frontend deben filtrar por `status = 'active'`.
+        * `INSERT`, `UPDATE`, `DELETE`: Permitido solo para usuarios autenticados con rol de administrador (`auth.role() = 'authenticated'`).
+
+* **Tabla `leads`**
+    * **RLS Habilitado:** Sí
+    * **Políticas:**
+        * `INSERT`: El acceso es público (`true`) para permitir que el formulario de la página principal funcione para cualquier visitante.
+        * `SELECT`, `UPDATE`, `DELETE`: Permitido solo para administradores.
+
+* **Tabla `applications` y Bucket `resumes`**
+    * **RLS Habilitado:** Sí
+    * **Políticas:**
+        * `applications (INSERT)`: El acceso debe ser público para que los candidatos puedan postularse.
+        * `applications (SELECT, UPDATE)`: Permitido solo para administradores.
+        * `storage.objects | resumes (SELECT)`: Permitido solo para administradores (verificado dentro de la función `get_signed_resume_url`).
+        * `storage.objects | resumes (INSERT)`: El acceso debe ser público.
+
+* **(Otras tablas como `companies`, `notifications`, etc.)**
+    * **RLS Habilitado:** Sí
+    * **Políticas:** Acceso completo (CRUD) restringido únicamente a usuarios autenticados como administradores.
+
+__________________________________________________________________________------------------------------______________________________
+# 📌 WG Labor – Backend Cheat Sheet (Supabase)
+
+**Roles válidos:**
+
+* `super_admin`
+* `agency_admin`
+
+---
+
+## 🔑 Autenticación
 
 ```javascript
-// Obtener todas las postulaciones
-async function getAllApplications() {
-  const { data, error } = await supabase
-    .from('applications')
-    .select('*, jobs(title), companies(name)') // Ejemplo de consulta con joins
-    .order('created_at', { ascending: false });
-  return data;
-}
+// Login
+await supabase.auth.signInWithPassword({ email, password });
 
-// Obtener una postulación por ID
-async function getApplicationById(applicationId) {
-  const { data, error } = await supabase
-    .from('applications')
-    .select('*, jobs(*, companies(*))') // Traer toda la información anidada
-    .eq('id', applicationId)
-    .single();
-  return data;
-}
+// Logout
+await supabase.auth.signOut();
+
+// Reset Password
+await supabase.auth.resetPasswordForEmail(email, { redirectTo: '/update-password' });
+
+// Update Password
+await supabase.auth.updateUser({ password: newPassword });
 ```
 
-### **Flujo de Conversión de Lead a Empresa (Función Clave)**
+---
 
-Este es el proceso para promover un lead a cliente.
+## 🌍 Público (sin login)
 
 ```javascript
-// Llama a la función de base de datos 'convert_lead_to_company'
-async function convertLeadToCompany(leadId) {
-  const { data: newCompanyId, error } = await supabase.rpc('convert_lead_to_company', {
-    p_lead_id: leadId
-  });
+// Info del sitio
+await supabase.from('site_settings').select('company_info').eq('id',1).single();
 
-  if (error) {
-    console.error('Error al convertir el lead:', error);
-    return null;
-  }
-  
-  // La función devuelve el ID de la nueva compañía creada
-  console.log(`Lead ${leadId} convertido a Compañía con ID: ${newCompanyId}`);
-  return newCompanyId;
-}
+// Ofertas recientes (máx 6)
+await supabase.from('jobs')
+  .select(`id, title:title->>es, location, companies(name, logo_url)`)
+  .eq('status','active')
+  .order('created_at',{ ascending:false })
+  .limit(6);
+
+// Crear lead
+await supabase.from('leads').insert([leadData]);
 ```
+
+---
+
+## 🏢 Leads y Empresas
+
+```javascript
+// Leads
+await supabase.from('leads').select('*').order('created_at',{ ascending:false });
+await supabase.from('leads').update({ status, notes }).eq('id', leadId);
+
+// Empresas
+await supabase.from('companies').insert([companyData]).select().single();
+await supabase.from('companies').update(updatedData).eq('id', companyId);
+await supabase.from('companies').delete().eq('id', companyId);
+
+// Convertir lead a empresa
+await supabase.rpc('convert_lead_to_company', { p_lead_id: leadId });
+```
+
+---
+
+## 💼 Ofertas (CRUD)
+
+```javascript
+await supabase.from('jobs').upsert(jobData).select();
+```
+
+---
+
+## 📄 Postulaciones y CVs
+
+```javascript
+// Todas las postulaciones
+await supabase.from('applications')
+  .select('*, jobs(title), companies(name)')
+  .order('created_at',{ ascending:false });
+
+// Postulación por ID
+await supabase.from('applications')
+  .select('*, jobs(*, companies(*))')
+  .eq('id', applicationId)
+  .single();
+
+// URL segura de CV
+await supabase.rpc('get_signed_resume_url', { path_to_file: filePath });
+```
+
+---
+
+## ⚙️ Contenido del Sitio
+
+```javascript
+// Actualizar info del sitio
+await supabase.from('site_settings').update({ company_info }).eq('id',1);
+
+// Documento legal (público)
+await supabase.from('legal_documents')
+  .select(`title:title->>es, content:content->>es`)
+  .eq('slug','privacy-policy')
+  .single();
+
+// Actualizar documento legal
+await supabase.from('legal_documents')
+  .update({ title, content })
+  .eq('id', id);
+```
+
+---
+
+## 🔔 Notificaciones en Tiempo Real
+
+```javascript
+const channel = supabase.channel('notifications-channel')
+  .on('postgres_changes',{
+    event:'INSERT', schema:'public', table:'notifications',
+    filter:`user_id=eq.${user.id}`
+  }, (payload) => { /* manejar nueva notificación */ })
+  .subscribe();
+```
+
+---
+
+## 🛠️ Automatizaciones (Triggers – solo backend)
+
+* `jobs`: `BEFORE UPDATE` → actualiza `updated_at`.
+* `leads`: `AFTER INSERT` → inserta notificación automática.
+
+---
