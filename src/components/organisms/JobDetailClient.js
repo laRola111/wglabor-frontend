@@ -1,9 +1,9 @@
 'use client';
 
-// AJUSTE FINAL: Importaciones separadas y correctas para React 19.
+// Importaciones corregidas y completas
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useActionState } from 'react';      // Hook de estado, desde 'react'
-import { useFormStatus } from 'react-dom';    // Hook de estado del DOM, desde 'react-dom'
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,7 @@ import { FaMapMarkerAlt, FaClock, FaDollarSign, FaBriefcase, FaShareAlt, FaWhats
 import { useToast } from '@/hooks/useToast';
 import { applyToAction } from '@/actions/apply';
 
-// --- SUB-COMPONENTE: MODAL DE APLICACIÓN ---
+// --- SUB-COMPONENTE: MODAL DE APLICACIÓN CONECTADO AL BACKEND ---
 const ApplicationModal = ({ job, lang, onClose }) => {
   const toast = useToast();
   
