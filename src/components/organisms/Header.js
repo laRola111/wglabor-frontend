@@ -45,21 +45,18 @@ export default function Header() {
     };
   }, [isMenuOpen]);
 
-  // Lógica para que el enlace 'Contacto' sea un ancla en el home o un enlace en otras páginas
-  const contactHref = isHomePage ? '#contact' : (isSpanish ? '/es/contact' : '/en/contact');
-  
-  const navLinks = isSpanish
+    const navLinks = isSpanish
     ? [
         { name: 'Buscar Empleos', href: '/es/jobs' },
         { name: 'Para Empresas', href: '/es/companies' },
         { name: 'Tips', href: '/es/resources' },
-        { name: 'Contacto', href: contactHref },
+        { name: 'Contacto', href: "#contact-form" },
       ]
     : [
         { name: 'Find Jobs', href: '/en/jobs' },
         { name: 'For Companies', href: '/en/companies' },
         { name: 'Tips', href: '/en/resources' },
-        { name: 'Contact', href: contactHref },
+        { name: 'Contact', href: "#contact-form" },
       ];
 
   const handleLinkClick = (href) => {

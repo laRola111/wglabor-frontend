@@ -1,9 +1,14 @@
-// CREAR NUEVO ARCHIVO: src/actions/contact.js
+// RUTA: src/actions/contact.js (REEMPLAZAR ARCHIVO COMPLETO)
 'use server';
 
-import { supabase } from "@/lib/supabase/client";
+// AJUSTE: Importamos el cliente correcto para Server Actions
+import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export async function createLeadAction(prevState, formData) {
+  // AJUSTE: Creamos una instancia de Supabase segura para el servidor
+  const supabase = createServerActionClient({ cookies });
+
   const name = formData.get('name');
   const company = formData.get('company');
   const email = formData.get('email');
@@ -11,7 +16,7 @@ export async function createLeadAction(prevState, formData) {
 
   // Validación simple en el servidor
   if (!name || !email || !message) {
-    return { success: false, message: 'Please fill out all required fields.' };
+    return { success: false, message: 'Por favor, completa todos los campos requeridos.' };
   }
 
   const { data, error } = await supabase
@@ -26,8 +31,8 @@ export async function createLeadAction(prevState, formData) {
 
   if (error) {
     console.error('Error creating lead:', error);
-    return { success: false, message: 'There was an error submitting your message. Please try again.' };
+    return { success: false, message: 'Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.' };
   }
 
-  return { success: true, message: 'Thank you! Your message has been sent successfully.' };
+  return { success: true, message: '¡Gracias! Tu mensaje ha sido enviado con éxito.' };
 }

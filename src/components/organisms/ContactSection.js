@@ -9,7 +9,7 @@ export default async function ContactSection({ dict, lang }) {
       contactTitle: "¿Interesado en nuestros servicios?",
       contactDescription: "Complete el formulario a continuación y nuestro equipo se pondrá en contacto para discutir cómo podemos ayudar a su empresa.",
       candidateSupport: "Si eres un candidato buscando soporte, por favor escríbenos a:",
-      supportEmail: "support@wglabor.com",
+      supportEmail: "info@wglaborllc.com",
       // ... textos para el formulario
       nameLabel: "Nombre Completo",
       companyLabel: "Empresa (Opcional)",
@@ -22,7 +22,7 @@ export default async function ContactSection({ dict, lang }) {
       contactTitle: "Interested in our services?",
       contactDescription: "Complete the form below and our team will get in touch to discuss how we can help your company.",
       candidateSupport: "If you are a candidate seeking support, please email us at:",
-      supportEmail: "support@wglabor.com",
+      supportEmail: "info@wglaborllc.com",
       // ... form texts
       nameLabel: "Full Name",
       companyLabel: "Company (Optional)",

@@ -1,37 +1,22 @@
-// RUTA: src/components/organisms/CompaniesSection.js (CÓDIGO CORREGIDO Y COMPLETO)
+// RUTA: src/components/organisms/CompaniesSection.js (REEMPLAZAR ARCHIVO COMPLETO)
+'use client'; // <-- Convertimos a Componente de Cliente para manejar onClick
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaArrowRight, FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../ui/Button';
 
-// CORRECCIÓN: La firma de la función ahora acepta 'dict' y 'lang' como props directas.
 export default function CompaniesSection({ dict, lang }) {
-  const content = {
-    es: {
-      title: "Encuentre el Talento que su Empresa Necesita",
-      description: "Publica tus vacantes con nosotros y accede a una red de profesionales cualificados y listos para trabajar.",
-      benefits: [
-        "Proceso de selección riguroso.",
-        "Acceso a una amplia red de talento.",
-        "Soluciones flexibles y a la medida."
-      ],
-      buttonText: "Publica tu vacante"
-    },
-    en: {
-      title: "Find the Talent Your Company Needs",
-      description: "Post your job openings with us and access a network of qualified professionals ready to work.",
-      benefits: [
-        "Rigorous selection process.",
-        "Access to a wide talent network.",
-        "Flexible and tailored solutions."
-      ],
-      buttonText: "Post a Job"
+  // El contenido del diccionario se obtiene de 'home'
+  const text = dict.home; 
+
+  const handleScrollToContact = (event) => {
+    event.preventDefault();
+    const contactSection = document.getElementById('contact-form');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
-
-  // El resto del componente ya estaba correcto.
-  const text = content[lang] || content['es'];
 
   return (
     <section className="relative z-10 py-20 px-8 bg-dark-background">
@@ -40,26 +25,38 @@ export default function CompaniesSection({ dict, lang }) {
         {/* Columna de Texto y CTA */}
         <div className="text-left">
           <h2 className="text-4xl lg:text-5xl font-bold text-dark-text mb-6">
-            {text.title}
+            {text.companiesTitle}
           </h2>
           <p className="text-lg text-dark-text-muted mb-8">
-            {text.description}
+            {text.companiesDescription}
           </p>
           
           <ul className="space-y-4 mb-10">
-            {text.benefits.map((benefit, index) => (
-              <li key={index} className="flex items-center text-dark-text-muted">
-                <FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" />
-                <span>{benefit}</span>
-              </li>
-            ))}
+            {/* Beneficios (simulados, se pueden añadir al diccionario también) */}
+            <li className="flex items-center text-dark-text-muted"><FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" /><span>Proceso de selección riguroso.</span></li>
+            <li className="flex items-center text-dark-text-muted"><FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" /><span>Acceso a una amplia red de talento.</span></li>
+            <li className="flex items-center text-dark-text-muted"><FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" /><span>Soluciones flexibles y a la medida.</span></li>
           </ul>
 
-          <Link href={`/${lang}/companies`}>
-            <Button className="text-lg px-8 py-3 group">
-              <span>{text.buttonText}</span>
+          {/* --- NUEVA SECCIÓN DE BOTONES --- */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Botón 1 (Principal): Encuentra tu Candidato (con scroll) */}
+            <Button 
+              onClick={handleScrollToContact} 
+              className="text-lg px-8 py-3"
+            >
+              <span>{text.findTalentButton}</span>
             </Button>
-          </Link>
+            
+            {/* Botón 2 (Secundario): Más Información (link a página) */}
+            <Link href={`/${lang}/companies`}>
+              <Button 
+                className="text-lg px-8 py-3 bg-transparent border-2 border-dark-border hover:bg-dark-surface hover:border-dark-surface"
+              >
+                <span>{text.moreInfoButton}</span>
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Columna de la Imagen */}

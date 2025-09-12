@@ -17,6 +17,7 @@ import CtaSeparator from '@/components/organisms/CtaSeparator'
 import { getRecentJobs } from '@/lib/supabase/queries';
 import { getDictionary } from '@/lib/dictionaries';
 import '@/styles/hero-background.css'; // Importamos nuestro CSS
+import TestimonialsSection from '@/components/organisms/TestimonialsSection';
 
 export async function generateMetadata({ params: { lang } }) {
   const dict = await getDictionary(lang);
@@ -85,17 +86,17 @@ export default async function Home({ params: { lang } }) {
       <AnimatedSection>
         <AboutUsSection dict={{ lang }} />
       </AnimatedSection>
-
       <AnimatedSection>
         <CompaniesSection dict={dict} lang={lang} />
       </AnimatedSection>
-      
+      <AnimatedSection>
+        <TipsSection dict={dict} />
+      </AnimatedSection>
       <AnimatedSection>
         <GallerySection dict={{ lang }} />
       </AnimatedSection>
-      
       <AnimatedSection>
-        <TipsSection dict={dict} />
+        <TestimonialsSection dict={dict.companiesPage} />
       </AnimatedSection>
 
       <ContactSection dict={dict} lang={lang} />
