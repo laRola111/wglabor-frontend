@@ -39,20 +39,25 @@ export async function getRecentJobs(language = "es", limit = 6) {
   return data;
 }
 
-// VERSIÓN MEJORADA: Ahora acepta filtros y paginación.
+
 export async function getPublicJobs(language = "es", options = {}) {
-  const { page = 1, pageSize = 20, keyword = '', location = '' } = options;
+  const { 
+    page = 1, pageSize = 20, keyword = '', location = '',
+    // Los filtros de categoría y tipo ahora pueden ser múltiples
+    categories = [],
+    employmentTypes = [],
+    minSalary = 0,
+  } = options;
+
   const lang = ["es", "en"].includes(language) ? language : "es";
   
   let query = supabase
     .from("jobs")
     .select(
       `
-      id, 
-      title:title->>${lang}, 
-      location, 
-      employment_type,
-      companies ( name )
+      id, title:title->>${lang}, location, employment_type,
+      salary_range_min, salary_range_max,
+      companies ( name, logo_url )
     `,
       { count: "exact" }
     )
@@ -60,15 +65,26 @@ export async function getPublicJobs(language = "es", options = {}) {
     .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  // Aplicamos filtros si existen
+  // --- LÓGICA DE FILTROS ACTUALIZADA PARA MÚLTIPLES VALORES ---
   if (keyword) {
-    // Usamos 'ilike' para búsquedas case-insensitive
     query = query.ilike(`title->>${lang}`, `%${keyword}%`);
   }
   if (location) {
-    query = query.ilike('location', `%${location}%`);
+    query = query.or(`location.ilike.%${location}%,zip_code.ilike.%${location}%`);
   }
-
+  // Si hay categorías seleccionadas, usamos el filtro 'in' de Supabase
+  if (categories.length > 0) {
+    query = query.in('job_category', categories);
+  }
+  // Lo mismo para el tipo de empleo
+  if (employmentTypes.length > 0) {
+    query = query.in('employment_type', employmentTypes);
+  }
+  if (minSalary > 0) {
+    query = query.gte('salary_range_min', minSalary);
+  }
+  // Eliminamos el filtro de maxSalary ya que el nuevo diseño usa solo un slider de mínimo
+  
   const { data, error, count } = await query;
   
   if (error) {
@@ -77,6 +93,7 @@ export async function getPublicJobs(language = "es", options = {}) {
   }
   return { data, count };
 }
+
 
 export async function getJobById(id, language = "es") {
   const lang = ["es", "en"].includes(language) ? language : "es";
