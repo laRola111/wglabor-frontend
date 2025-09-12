@@ -1,7 +1,10 @@
-// CREAR NUEVO ARCHIVO: src/components/organisms/ContactForm.js
+// RUTA: src/components/organisms/ContactForm.js (CÓDIGO FINAL Y CORRECTO)
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+// AJUSTE: Separamos las importaciones. useActionState de 'react', useFormStatus de 'react-dom'.
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
+
 import { createLeadAction } from '@/actions/contact';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -22,7 +25,7 @@ function SubmitButton({ dict }) {
 }
 
 export default function ContactForm({ dict }) {
-  const [state, formAction] = useFormState(createLeadAction, initialState);
+  const [state, formAction] = useActionState(createLeadAction, initialState);
 
   return (
     <form action={formAction} className="space-y-6">

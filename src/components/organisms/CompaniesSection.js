@@ -1,10 +1,11 @@
-// RUTA: src/components/organisms/CompaniesSection.js (REEMPLAZAR TODO EL ARCHIVO)
+// RUTA: src/components/organisms/CompaniesSection.js (CÓDIGO CORREGIDO Y COMPLETO)
 
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaArrowRight, FaCheckCircle } from 'react-icons/fa';
 import Button from '../ui/Button';
 
+// CORRECCIÓN: La firma de la función ahora acepta 'dict' y 'lang' como props directas.
 export default function CompaniesSection({ dict, lang }) {
   const content = {
     es: {
@@ -29,6 +30,7 @@ export default function CompaniesSection({ dict, lang }) {
     }
   };
 
+  // El resto del componente ya estaba correcto.
   const text = content[lang] || content['es'];
 
   return (
@@ -56,7 +58,6 @@ export default function CompaniesSection({ dict, lang }) {
           <Link href={`/${lang}/companies`}>
             <Button className="text-lg px-8 py-3 group">
               <span>{text.buttonText}</span>
-              {/* <FaArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-1" /> */}
             </Button>
           </Link>
         </div>
