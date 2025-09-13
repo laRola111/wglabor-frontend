@@ -57,3 +57,27 @@ a {
   background-size: 400% 400%;
   animation: gradient-animation 15s ease infinite;
 }
+
+.embla__viewport {
+  overflow: hidden;
+}
+.embla__container {
+  display: flex;
+  gap: 1rem; /* Espacio entre las imágenes */
+}
+.embla__slide {
+  flex: 0 0 100%; /* Por defecto 1 slide en móvil */
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .embla__slide {
+    flex: 0 0 50%; /* 2 slides en tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .embla__slide {
+    flex: 0 0 25%; /* 4 slides en desktop, como pediste */
+  }
+}
