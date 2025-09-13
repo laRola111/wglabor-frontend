@@ -90,7 +90,7 @@ export default async function Home({ params: { lang } }) {
         <CompaniesSection dict={dict} lang={lang} />
       </AnimatedSection>
       <AnimatedSection>
-        <TipsSection dict={dict} />
+        <TipsSection dict={dict} lang={lang}/>
       </AnimatedSection>
       <AnimatedSection>
         <GallerySection dict={{ lang }} />

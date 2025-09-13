@@ -21,6 +21,31 @@ export const dictionary = {
     contactButton: "Contact Us",
     moreInfoButton: "More Info",
     findTalentButton: "Find Your Candidate",
+    
+    // New keys for the expanded resources page
+    resourcesPageTitle: "Boost Your Career with Our Exclusive Resources",
+    resourcesPageSubtitle: "From perfecting your resume to mastering the interview, we support you every step of the way to find your ideal job.",
+    
+    cvSectionTitle: "Optimize Your Resume and Cover Letter",
+    cvSectionDesc: "Learn how to create documents that capture recruiters' attention and open doors to new opportunities.",
+    cvTip1: "How to structure an impactful resume",
+    cvTip2: "Keywords that get you noticed by recruiters",
+    cvTip3: "Winning cover letter templates",
+    
+    interviewSectionTitle: "Prepare for Interview Success",
+    interviewSectionDesc: "Confidence is key. With our guides, you'll be ready for any question and leave a memorable impression.",
+    interviewTip1: "Common questions and answers",
+    interviewTip2: "Tips for virtual interviews",
+    interviewTip3: "How to effectively negotiate your salary",
+    
+    hiringSectionTitle: "Tips for the Hiring Process",
+    hiringSectionDesc: "We guide you through the final steps to make the transition to your new job as smooth as possible.",
+    hiringTip1: "Understanding job offers",
+    hiringTip2: "Essential documents and procedures",
+    hiringTip3: "First weeks: how to excel in your new role",
+    
+    startSearching: "Start searching for jobs",
+    browseJobs: "Explore all openings",
   },
   jobs: {
     showingResults: "Showing {start}-{end} of {total} jobs",

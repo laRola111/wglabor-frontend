@@ -6,7 +6,6 @@ export const dictionary = {
     searchPlaceholder: "Título del trabajo o palabra clave",
     locationPlaceholder: "Ciudad o código postal",
     searchButton: "Buscar Empleos",
-    // --- NUEVAS CLAVES ---
     companiesTitle: "Encuentre el Talento que su Empresa Necesita",
     companiesDescription: "Publica tus vacantes con nosotros y accede a una red de profesionales cualificados y listos para trabajar. Simplificamos tu proceso de contratación.",
     companiesButton: "Publicar un Empleo",
@@ -22,6 +21,35 @@ export const dictionary = {
     contactButton: "Contáctenos",
     moreInfoButton: "Más Información",
     findTalentButton: "Encuentra tu Candidato",
+    tipsTitle: "Recursos para Impulsar su Carrera",
+    tipsDescription: "Aquí encontrará artículos, guías y consejos prácticos para cada etapa de su búsqueda de empleo. Desde la optimización de su CV hasta la preparación para entrevistas, estamos aquí para ayudarle a alcanzar sus metas profesionales.",
+    tipsTitle: "Recursos para Impulsar tu Carrera",
+    tipsDescription: "Aquí encontrarás guías, artículos y consejos prácticos para cada etapa de tu búsqueda de empleo. Estamos aquí para ayudarte a alcanzar tus metas.",
+    
+    // Nuevas claves para la página de recursos expandida
+    resourcesPageTitle: "Impulsa tu Carrera con Nuestros Recursos Exclusivos",
+    resourcesPageSubtitle: "Desde perfeccionar tu CV hasta dominar la entrevista, te acompañamos en cada paso para que encuentres tu trabajo ideal.",
+    
+    cvSectionTitle: "Optimiza tu CV y Carta de Presentación",
+    cvSectionDesc: "Aprende a crear documentos que capturen la atención de los reclutadores y te abran las puertas a nuevas oportunidades.",
+    cvTip1: "Cómo estructurar un CV impactante",
+    cvTip2: "Palabras clave que activan a los reclutadores",
+    cvTip3: "Plantillas de cartas de presentación ganadoras",
+    
+    interviewSectionTitle: "Prepárate para el Éxito en tus Entrevistas",
+    interviewSectionDesc: "La confianza es clave. Con nuestras guías, estarás listo para cualquier pregunta y dejarás una impresión memorable.",
+    interviewTip1: "Preguntas y respuestas comunes",
+    interviewTip2: "Consejos para entrevistas virtuales",
+    interviewTip3: "Cómo negociar tu salario de forma efectiva",
+    
+    hiringSectionTitle: "Consejos para el Proceso de Contratación",
+    hiringSectionDesc: "Te guiamos a través de los últimos pasos para que la transición a tu nuevo empleo sea lo más fluida posible.",
+    hiringTip1: "Entendiendo las ofertas de trabajo",
+    hiringTip2: "Documentos y trámites esenciales",
+    hiringTip3: "Primeras semanas: cómo destacar en tu nuevo rol",
+    
+    startSearching: "Empieza a buscar empleo",
+    browseJobs: "Explora todas las ofertas",
   },
   jobs: {
     showingResults: "Mostrando {start}-{end} de {total} empleos",

@@ -1,4 +1,4 @@
-// src/components/organisms/Footer.js
+// RUTA: src/components/organisms/Footer.js
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaLinkedin, FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
@@ -13,8 +13,6 @@ const SocialLink = ({ href, icon: Icon }) => (
 
 export default async function Footer({ lang }) {
   const siteSettings = await getSiteSettings();
-
-  // Diccionario de textos LOCAL y unificado para el Footer.
   const footerDict = {
     es: {
       description: "Conectando talento excepcional con compañías líderes en el mercado.",
@@ -25,7 +23,7 @@ export default async function Footer({ lang }) {
       terms: "Términos de Servicio",
       follow: "Síguenos",
       copyright: `© ${new Date().getFullYear()} WGLABOR LLC. Todos los derechos reservados.`,
-      adminLogin: "Admin Login", // <-- AHORA VIVE AQUÍ
+      adminLogin: "Admin Login",
       navLinks: [
         { name: 'Buscar Empleos', href: '/es/jobs' },
         { name: 'Para Empresas', href: '/es/companies' },
@@ -42,7 +40,7 @@ export default async function Footer({ lang }) {
       terms: "Terms of Service",
       follow: "Follow Us",
       copyright: `© ${new Date().getFullYear()} WGLABOR LLC. All rights reserved.`,
-      adminLogin: "Admin Login", // <-- NOW LIVES HERE
+      adminLogin: "Admin Login",
       navLinks: [
         { name: 'Find Jobs', href: '/en/jobs' },
         { name: 'For Companies', href: '/en/companies' },
@@ -55,14 +53,18 @@ export default async function Footer({ lang }) {
   const d = footerDict[lang] || footerDict['es'];
 
   return (
-    
     <footer className="bg-dark-background border-t border-dark-surface text-dark-text-muted  z-10">
       <div className="max-w-7xl mx-auto px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          
           <div className="space-y-4">
             <Link href={`/${lang}`}>
-              <Image src={logo} alt="WGLABOR LLC Logo" width={180} height={40} className="opacity-80"/>
+              <Image 
+                src={logo} 
+                alt="WGLABOR LLC Logo" 
+                width={180} 
+                height={40} 
+                className="opacity-80"
+              />
             </Link>
             <p className="text-sm">{d.description}</p>
           </div>
@@ -79,7 +81,7 @@ export default async function Footer({ lang }) {
               ))}
               <li>
                 <Link href="/login" className="hover:text-accent-primary transition-colors">
-                  {d.adminLogin} {/* Usamos el diccionario local */}
+                  {d.adminLogin}
                 </Link>
               </li>
             </ul>
