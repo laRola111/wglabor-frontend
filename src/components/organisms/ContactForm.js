@@ -1,7 +1,6 @@
-// RUTA: src/components/organisms/ContactForm.js (VERSIFICACIÓN FINAL)
+// RUTA: src/components/organisms/ContactForm.js (ACTUALIZADO)
 'use client';
 
-// Hooks de React 19 correctamente importados
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createLeadAction } from '@/actions/contact';
@@ -17,7 +16,7 @@ const initialState = {
 function SubmitButton({ dict }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full text-lg py-3" disabled={pending}>
+    <Button type="submit" className="w-full text-lg py-3 mt-4" disabled={pending}>
       {pending ? dict.sending : dict.sendButton}
     </Button>
   );
@@ -38,10 +37,24 @@ export default function ContactForm({ dict }) {
           <Input id="company" name="company" type="text" className="mt-1 w-full" />
         </div>
       </div>
-      <div>
-        <Label htmlFor="email">{dict.emailLabel}</Label>
-        <Input id="email" name="email" type="email" required className="mt-1 w-full" />
+
+      {/* --- SECCIÓN DE CONTACTO MEJORADA --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="email">{dict.emailLabel}</Label>
+          {/* Se elimina 'required' para validación condicional en el servidor */}
+          <Input id="email" name="email" type="email" className="mt-1 w-full" />
+        </div>
+        <div>
+          <Label htmlFor="phone">Teléfono</Label>
+          {/* Se añade el nuevo campo de teléfono */}
+          <Input id="phone" name="phone" type="tel" className="mt-1 w-full" />
+        </div>
       </div>
+      <p className="text-xs text-center text-dark-text-muted -mt-4">
+        * Se requiere al menos un correo electrónico o un teléfono.
+      </p>
+
       <div>
         <Label htmlFor="message">{dict.messageLabel}</Label>
         <textarea
@@ -52,7 +65,9 @@ export default function ContactForm({ dict }) {
           className="mt-1 w-full bg-dark-background text-dark-text px-4 py-3 rounded-lg ring-2 ring-dark-border focus:outline-none focus:ring-2 focus:ring-accent-primary"
         ></textarea>
       </div>
+      
       <SubmitButton dict={dict} />
+      
       {state.message && (
         <p className={`text-center text-sm mt-4 ${state.success ? 'text-green-400' : 'text-red-400'}`}>
           {state.message}

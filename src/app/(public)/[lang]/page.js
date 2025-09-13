@@ -27,13 +27,6 @@ export async function generateMetadata({ params: { lang } }) {
   };
 }
 
-// Componente para el separador visual
-const Separator = () => (
-  <div 
-    className="h-24 bg-gradient-to-t from-dark-background to-transparent"
-    aria-hidden="true"
-  />
-);
 
 export default async function Home({ params: { lang } }) {
   const dict = await getDictionary(lang);
