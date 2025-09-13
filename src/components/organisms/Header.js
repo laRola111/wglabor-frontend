@@ -78,14 +78,15 @@ export default function Header() {
       >
         <nav className="flex justify-between items-center w-full max-w-7xl mx-auto">
           <Link href={isSpanish ? '/es' : '/en'} className="flex-shrink-0">
-            <Image
-              src={logo}
-              alt="WGLABOR LLC Logo"
-              width={160}
-              height={36}
-              priority
-              className="sm:w-[180px] sm:h-[30px]"
-            />
+           <Image
+  src={logo}
+  alt="WGLABOR LLC Logo"
+  width={160}
+  height={36}
+  priority
+  // AJUSTE: Cambiamos sm:h-[30px] por sm:h-auto para mantener la relación de aspecto.
+  className="w-[160px] h-auto sm:w-[180px]"
+/>
           </Link>
 
           <div className="hidden md:flex justify-center flex-grow space-x-8 text-dark-text-muted text-lg">

@@ -36,11 +36,13 @@ export default function VisualBlock({ title, description, iconName, extendedCont
         {extendedContent && (
           <>
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="overflow-hidden"
-            >
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      viewport={{ once: true, amount: 0.4 }}
+      className="relative p-8 md:p-12 rounded-3xl shadow-xl border-2 border-dark-border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] overflow-hidden"
+      {...props} // Pasamos el resto de las props, ya sin las personalizadas.
+    >
               {imageUrl && (
                 <div className="relative w-full h-48 rounded-lg overflow-hidden mb-6 mt-4">
                   <Image 

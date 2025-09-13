@@ -5,9 +5,7 @@ import JobSearchBar from '@/components/molecules/JobSearchBar';
 import VisualBlock from '@/components/ui/VisualBlock';
 import CtaBlock from '@/components/ui/CtaBlock';
 
-export async function generateMetadata({ params }) {
-  // Desestructuración correcta para evitar errores de Next.js
-  const { lang } = params; 
+export async function generateMetadata({ params: { lang } }) {
   const dict = await getDictionary(lang);
   const t = dict.home;
   return {
@@ -16,11 +14,10 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function ResourcesPage({ params }) {
-  // Desestructuración correcta para evitar errores de Next.js
-  const { lang } = params;
+export default async function ResourcesPage({ params: { lang } }) {
   const dict = await getDictionary(lang);
   const t = dict.home;
+
 
   const tipsData = [
     {

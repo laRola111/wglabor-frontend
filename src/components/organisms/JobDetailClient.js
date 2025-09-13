@@ -1,20 +1,22 @@
+// RUTA: src/components/organisms/JobDetailClient.js
 'use client';
 
-// Importaciones corregidas y completas
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-
+// Importaciones (las mismas que antes, pero agregando useState y useEffect si no estuvieran)
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Label from '@/components/ui/Label';
-import { FaMapMarkerAlt, FaClock, FaDollarSign, FaBriefcase, FaShareAlt, FaWhatsapp, FaLink, FaTimes } from 'react-icons/fa';
+// ... el resto de tus importaciones ...
 import { useToast } from '@/hooks/useToast';
+import Button from '@/components/ui/Button';
+import Label from '@/components/ui/Label';
+import Input from '@/components/ui/Input';
+import { FaMapMarkerAlt, FaClock, FaDollarSign, FaBriefcase, FaShareAlt, FaWhatsapp, FaLink, FaTimes } from 'react-icons/fa';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { applyToAction } from '@/actions/apply';
 
-// --- SUB-COMPONENTE: MODAL DE APLICACIÓN CONECTADO AL BACKEND ---
+
+// --- SUB-COMPONENTE: MODAL DE APLICACIÓN (SIN CAMBIOS) ---
 const ApplicationModal = ({ job, lang, onClose }) => {
   const toast = useToast();
   
@@ -78,18 +80,26 @@ const ApplicationModal = ({ job, lang, onClose }) => {
   );
 };
 
-// --- COMPONENTE PRINCIPAL ---
+
+// --- COMPONENTE PRINCIPAL (CON CORRECCIONES) ---
 export default function JobDetailClient({ job, lang }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toast = useToast();
+  
+  // SOLUCIÓN: Usar un estado para saber si el componente ya se montó en el cliente
+  const [isMounted, setIsMounted] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
 
   const companyName = job.companies?.name || 'Empresa Confidencial';
   const logoSrc = job.companies?.logo_url || '/icon.png';
 
+  // SOLUCIÓN: Este efecto se ejecuta solo una vez cuando el componente se monta
   useEffect(() => {
+    // Marcamos que el componente está montado
+    setIsMounted(true);
+    // Y ahora sí, de forma segura, accedemos a window
     setShareUrl(window.location.href);
-  }, []);
+  }, []); // El array de dependencias vacío asegura que solo se ejecute una vez
 
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(`${job.title} - ${companyName}\n${shareUrl}`)}`;
 
@@ -99,10 +109,9 @@ export default function JobDetailClient({ job, lang }) {
   };
 
   const handleCopyLink = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl);
-      toast.info(lang === 'es' ? '¡Enlace copiado!' : 'Link copied!');
-    }
+    // No necesitamos la comprobación 'if (shareUrl)' porque el botón estará deshabilitado
+    navigator.clipboard.writeText(shareUrl);
+    toast.info(lang === 'es' ? '¡Enlace copiado!' : 'Link copied!');
   };
 
   return (
@@ -111,7 +120,8 @@ export default function JobDetailClient({ job, lang }) {
         className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
       >
-        <div className="bg-dark-surface p-8 rounded-lg border border-dark-border mb-8">
+        {/* ... El resto del JSX superior no cambia ... */}
+         <div className="bg-dark-surface p-8 rounded-lg border border-dark-border mb-8">
           <div className="flex flex-col md:flex-row gap-6">
             <Image 
               src={logoSrc} alt={`${companyName} logo`} width={80} height={80}
@@ -143,7 +153,6 @@ export default function JobDetailClient({ job, lang }) {
               ))}
             </article>
           </main>
-
           <aside className="lg:col-span-1">
             <div className="sticky top-24 p-6 bg-dark-surface rounded-lg border border-dark-border">
               <h3 className="text-xl font-bold text-dark-text mb-6">
@@ -160,9 +169,12 @@ export default function JobDetailClient({ job, lang }) {
                    {lang === 'es' ? 'Compartir esta oferta' : 'Share this job'}
                  </h3>
                  <div className="flex space-x-2">
-                    <button onClick={handleCopyLink} disabled={!shareUrl} className="flex-1 bg-dark-background hover:bg-dark-border text-dark-text-muted text-sm p-2 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><FaLink /> {lang === 'es' ? 'Copiar' : 'Copy'}</button>
-                    <a href={shareUrl ? whatsappShareUrl : undefined} target="_blank" rel="noopener noreferrer" 
-                       className={`flex-1 bg-dark-background hover:bg-dark-border text-dark-text-muted text-sm p-2 rounded-md transition-colors flex items-center justify-center gap-2 ${!shareUrl ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
+                    {/* SOLUCIÓN: Deshabilitar basado en `!isMounted` para asegurar consistencia */}
+                    <button onClick={handleCopyLink} disabled={!isMounted} className="flex-1 bg-dark-background hover:bg-dark-border text-dark-text-muted text-sm p-2 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <FaLink /> {lang === 'es' ? 'Copiar' : 'Copy'}
+                    </button>
+                    <a href={isMounted ? whatsappShareUrl : undefined} target="_blank" rel="noopener noreferrer" 
+                       className={`flex-1 bg-dark-background hover:bg-dark-border text-dark-text-muted text-sm p-2 rounded-md transition-colors flex items-center justify-center gap-2 ${!isMounted ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
                       <FaWhatsapp /> WhatsApp
                     </a>
                  </div>
