@@ -4,14 +4,22 @@ import './globals.css';
 import { GeistSans } from 'geist/font/sans';
 
 export const metadata = {
-  title: 'WG Labor LLC | Agencia de gestión de trabajadores temporales',
-  description: 'Agencia líder en gestión de trabajadores temporales. Conectamos talento excepcional con compañías líderes en el mercado.',
-  keywords: ['agencia de empleo', 'trabajo temporal', 'gestión de personal', 'contratación', 'ofertas de empleo'],
+  title: 'WG Labor LLC | Temporary & Temp-to-Hire Staffing Agency',
+  description: 'As a leading staffing agency, we connect exceptional talent with top companies. Specializing in temporary and temp-to-hire solutions.',
+  keywords: [
+    'staffing agency', 
+    'temporary staffing', 
+    'temp agency', 
+    'recruitment', 
+    'hiring solutions', 
+    'workforce management', 
+    'temp jobs'
+  ]
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="en">
       {/* 2. Aplicamos la clase de la nueva fuente al body */}
       <body className={GeistSans.className}>
         {children}
