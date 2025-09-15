@@ -1,11 +1,15 @@
-// RUTA: src/app/(admin)/dashboard/jobs/[id]/page.js
-export default function JobDetailPage({ params }) {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Detalle de la Oferta #{params.id}</h1>
-      <div className="bg-dark-surface p-8 rounded-lg border border-dark-border">
-        <p className="text-dark-text-muted">Aquí se mostrarán todos los detalles de la oferta y la lista de candidatos postulados.</p>
-      </div>
-    </div>
-  );
+// RUTA: src/app/(admin)/dashboard/jobs/[id]/page.js (VERSIÓN FINAL)
+import { notFound } from 'next/navigation';
+import { getJobForAdmin } from '@/lib/supabase/queries';
+import JobDetailClient from './JobDetailClient'; // Necesitaremos un componente de cliente
+
+export default async function JobDetailPage({ params }) {
+  const job = await getJobForAdmin(params.id);
+
+  if (!job) {
+    notFound();
+  }
+
+  // Pasamos los datos del trabajo al componente de cliente
+  return <JobDetailClient job={job} />;
 }

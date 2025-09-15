@@ -40,14 +40,19 @@ export async function getRecentJobs(language = "es", limit = 6) {
 }
 
 export async function getPublicJobs(language = "es", options = {}) {
-  const { 
-    page = 1, pageSize = 10, keyword = '', location = '',
-    categories = [], employmentTypes = [], minSalary = 0,
-    sortBy = 'date_desc' // 1. AÑADIMOS 'sortBy' CON UN VALOR POR DEFECTO
+  const {
+    page = 1,
+    pageSize = 10,
+    keyword = "",
+    location = "",
+    categories = [],
+    employmentTypes = [],
+    minSalary = 0,
+    sortBy = "date_desc", // 1. AÑADIMOS 'sortBy' CON UN VALOR POR DEFECTO
   } = options;
 
   const lang = ["es", "en"].includes(language) ? language : "es";
-  
+
   let query = supabase
     .from("jobs")
     .select(
@@ -63,27 +68,31 @@ export async function getPublicJobs(language = "es", options = {}) {
 
   // --- Lógica de filtros (sin cambios) ---
   if (keyword) query = query.ilike(`title->>${lang}`, `%${keyword}%`);
-  if (location) query = query.or(`location.ilike.%${location}%,zip_code.ilike.%${location}%`);
-  if (categories.length > 0) query = query.in('job_category', categories);
-  if (employmentTypes.length > 0) query = query.in('employment_type', employmentTypes);
-  if (minSalary > 0) query = query.gte('salary_range_min', minSalary);
-  
+  if (location)
+    query = query.or(
+      `location.ilike.%${location}%,zip_code.ilike.%${location}%`
+    );
+  if (categories.length > 0) query = query.in("job_category", categories);
+  if (employmentTypes.length > 0)
+    query = query.in("employment_type", employmentTypes);
+  if (minSalary > 0) query = query.gte("salary_range_min", minSalary);
+
   // --- 2. LÓGICA DE ORDENAMIENTO DINÁMICO ---
-  let sortColumn = 'created_at';
+  let sortColumn = "created_at";
   let sortOptions = { ascending: false };
-  
+
   switch (sortBy) {
-    case 'salary_desc':
-      sortColumn = 'salary_range_min';
+    case "salary_desc":
+      sortColumn = "salary_range_min";
       sortOptions = { ascending: false, nullsFirst: false }; // Los salarios nulos van al final
       break;
-    case 'title_asc':
+    case "title_asc":
       sortColumn = `title->>${lang}`;
       sortOptions = { ascending: true };
       break;
     // El caso por defecto es 'date_desc'
     default:
-      sortColumn = 'created_at';
+      sortColumn = "created_at";
       sortOptions = { ascending: false };
       break;
   }
@@ -92,7 +101,7 @@ export async function getPublicJobs(language = "es", options = {}) {
   query = query.order(sortColumn, sortOptions);
 
   const { data, error, count } = await query;
-  
+
   if (error) {
     console.error("Error fetching public jobs:", error.message);
     return { data: [], count: 0 };
@@ -128,14 +137,14 @@ export async function getJobById(id, language = "es") {
   return data;
 }
 
-export async function getLegalDocument(slug, language = 'es') {
+export async function getLegalDocument(slug, language = "es") {
   const lang = ["es", "en"].includes(language) ? language : "es";
   const { data, error } = await supabase
-    .from('legal_documents')
+    .from("legal_documents")
     .select(`title:title->>${lang}, content:content->>${lang}`)
-    .eq('slug', slug)
+    .eq("slug", slug)
     .single();
-  
+
   if (error) {
     console.error(`Error fetching legal doc (${slug}):`, error.message);
     return null;
@@ -143,6 +152,7 @@ export async function getLegalDocument(slug, language = 'es') {
   return data;
 }
 
+// --- QUERIES PRIVADAS ---
 export async function getUserProfile(userId) {
   if (!userId) return null;
   const { data, error } = await supabase
@@ -158,8 +168,6 @@ export async function getUserProfile(userId) {
 
   return data;
 }
-
-// --- QUERIES PRIVADAS ---
 
 export async function getAllJobsForAdmin() {
   const { data, error } = await supabase
@@ -182,3 +190,27 @@ export async function getAllJobsForAdmin() {
   return data;
 }
 
+export async function getCompanyList() {
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, name")
+    .order("name", { ascending: true });
+  if (error) {
+    console.error("Error fetching company list:", error);
+    return [];
+  }
+  return data;
+}
+export async function getJobForAdmin(jobId) {
+  if (!jobId) return null;
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("*, companies(id, name)")
+    .eq("id", jobId)
+    .single();
+  if (error) {
+    console.error(`Error fetching job ${jobId} for admin:`, error);
+    return null;
+  }
+  return data;
+}
