@@ -1,23 +1,14 @@
-// RUTA: src/actions/apply.js (REEMPLAZAR ARCHIVO COMPLETO)
+// RUTA: src/actions/apply.js (AÑADIR UN CONSOLE.LOG)
 'use server';
 
-// AJUSTE: Importamos el createClient estándar en lugar del de auth-helpers
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function applyToAction(prevState, formData) {
-  // AJUSTE: Creamos un cliente de Supabase con privilegios de administrador (service_role)
-  // Esto es seguro porque este código SÓLO se ejecuta en el servidor.
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
-    }
+    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
   );
 
   const name = formData.get('name');
@@ -33,7 +24,6 @@ export async function applyToAction(prevState, formData) {
   const fileExtension = resumeFile.name.split('.').pop();
   const fileName = `${uuidv4()}.${fileExtension}`;
   
-  // Con el cliente de servicio, esta operación ahora tendrá los permisos necesarios
   const { data: uploadData, error: uploadError } = await supabase
     .storage
     .from('resumes')
@@ -43,6 +33,10 @@ export async function applyToAction(prevState, formData) {
     console.error('Error uploading resume:', uploadError);
     return { success: false, message: 'Hubo un error al subir tu CV. Intenta de nuevo.' };
   }
+
+  // --- PUNTO DE CONTROL 1 ---
+  // Vamos a ver exactamente qué estamos guardando.
+  console.log(`[UPLOAD ACTION] Path saved to DB: "${uploadData.path}"`);
 
   const { error: insertError } = await supabase
     .from('applications')

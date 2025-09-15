@@ -1,4 +1,4 @@
-// RUTA: src/components/organisms/DataTable.js (NUEVO ARCHIVO)
+// RUTA: src/components/organisms/DataTable.js (REEMPLAZAR ARCHIVO COMPLETO)
 'use client';
 
 import React from 'react';
@@ -14,7 +14,7 @@ const DataTable = ({ columns, data, renderActions }) => {
 
   return (
     <div className="bg-dark-surface rounded-lg border border-dark-border overflow-hidden">
-      {/* Vista de Tabla para Escritorio (md y superior) */}
+      {/* Vista de Tabla para Escritorio */}
       <div className="overflow-x-auto hidden md:block">
         <table className="min-w-full divide-y divide-dark-border">
           <thead className="bg-dark-background">
@@ -28,8 +28,9 @@ const DataTable = ({ columns, data, renderActions }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-dark-border">
-            {data.map((row) => (
-              <tr key={row.id}>
+            {data.map((row, index) => (
+              // SOLUCIÓN: Hacemos la clave más robusta usando el id y el índice.
+              <tr key={row.id || index}>
                 {columns.map((col) => (
                   <td key={col.accessorKey} className="px-6 py-4 whitespace-nowrap text-sm text-dark-text">
                     {col.cell ? col.cell({ value: row[col.accessorKey], row }) : row[col.accessorKey]}
@@ -46,13 +47,14 @@ const DataTable = ({ columns, data, renderActions }) => {
         </table>
       </div>
 
-      {/* Vista de Tarjetas para Móvil (hasta md) */}
+      {/* Vista de Tarjetas para Móvil */}
       <div className="block md:hidden">
         <div className="px-4 py-2 space-y-4">
-          {data.map((row) => (
-            <div key={row.id} className="bg-dark-background p-4 rounded-lg border border-dark-border">
+          {data.map((row, index) => (
+            // SOLUCIÓN: Hacemos la clave más robusta usando el id y el índice.
+            <div key={row.id || index} className="bg-dark-background p-4 rounded-lg border border-dark-border">
               {columns.map((col) => (
-                <div key={col.accessorKey} className="flex justify-between py-1 border-b border-dark-border last:border-b-0">
+                <div key={col.accessorKey} className="flex justify-between py-1 border-b border-dark-border last:border-b-0 items-center">
                   <span className="text-sm font-medium text-dark-text-muted">{col.header}</span>
                   <span className="text-sm text-dark-text text-right">
                     {col.cell ? col.cell({ value: row[col.accessorKey], row }) : row[col.accessorKey]}

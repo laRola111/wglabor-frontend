@@ -1,15 +1,18 @@
-// RUTA: src/app/(admin)/dashboard/jobs/[id]/page.js (VERSIÓN FINAL)
+// RUTA: src/app/(admin)/dashboard/jobs/[id]/page.js (REEMPLAZAR ARCHIVO COMPLETO)
 import { notFound } from 'next/navigation';
-import { getJobForAdmin } from '@/lib/supabase/queries';
-import JobDetailClient from './JobDetailClient'; // Necesitaremos un componente de cliente
+import { getJobForAdmin, getApplicationsForJob } from '@/lib/supabase/queries';
+import JobDetailClient from './JobDetailClient';
 
-export default async function JobDetailPage({ params }) {
-  const job = await getJobForAdmin(params.id);
+// SOLUCIÓN: Desestructuramos 'id' directamente de 'params' para seguir las mejores prácticas.
+export default async function JobDetailPageAdmin({ params: { id } }) {
+  const [job, applications] = await Promise.all([
+    getJobForAdmin(id),
+    getApplicationsForJob(id)
+  ]);
 
   if (!job) {
     notFound();
   }
 
-  // Pasamos los datos del trabajo al componente de cliente
-  return <JobDetailClient job={job} />;
+  return <JobDetailClient job={job} applications={applications} />;
 }
