@@ -39,14 +39,11 @@ export async function getRecentJobs(language = "es", limit = 6) {
   return data;
 }
 
-
 export async function getPublicJobs(language = "es", options = {}) {
   const { 
-    page = 1, pageSize = 20, keyword = '', location = '',
-    // Los filtros de categoría y tipo ahora pueden ser múltiples
-    categories = [],
-    employmentTypes = [],
-    minSalary = 0,
+    page = 1, pageSize = 10, keyword = '', location = '',
+    categories = [], employmentTypes = [], minSalary = 0,
+    sortBy = 'date_desc' // 1. AÑADIMOS 'sortBy' CON UN VALOR POR DEFECTO
   } = options;
 
   const lang = ["es", "en"].includes(language) ? language : "es";
@@ -62,29 +59,38 @@ export async function getPublicJobs(language = "es", options = {}) {
       { count: "exact" }
     )
     .eq("status", "active")
-    .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  // --- LÓGICA DE FILTROS ACTUALIZADA PARA MÚLTIPLES VALORES ---
-  if (keyword) {
-    query = query.ilike(`title->>${lang}`, `%${keyword}%`);
-  }
-  if (location) {
-    query = query.or(`location.ilike.%${location}%,zip_code.ilike.%${location}%`);
-  }
-  // Si hay categorías seleccionadas, usamos el filtro 'in' de Supabase
-  if (categories.length > 0) {
-    query = query.in('job_category', categories);
-  }
-  // Lo mismo para el tipo de empleo
-  if (employmentTypes.length > 0) {
-    query = query.in('employment_type', employmentTypes);
-  }
-  if (minSalary > 0) {
-    query = query.gte('salary_range_min', minSalary);
-  }
-  // Eliminamos el filtro de maxSalary ya que el nuevo diseño usa solo un slider de mínimo
+  // --- Lógica de filtros (sin cambios) ---
+  if (keyword) query = query.ilike(`title->>${lang}`, `%${keyword}%`);
+  if (location) query = query.or(`location.ilike.%${location}%,zip_code.ilike.%${location}%`);
+  if (categories.length > 0) query = query.in('job_category', categories);
+  if (employmentTypes.length > 0) query = query.in('employment_type', employmentTypes);
+  if (minSalary > 0) query = query.gte('salary_range_min', minSalary);
   
+  // --- 2. LÓGICA DE ORDENAMIENTO DINÁMICO ---
+  let sortColumn = 'created_at';
+  let sortOptions = { ascending: false };
+  
+  switch (sortBy) {
+    case 'salary_desc':
+      sortColumn = 'salary_range_min';
+      sortOptions = { ascending: false, nullsFirst: false }; // Los salarios nulos van al final
+      break;
+    case 'title_asc':
+      sortColumn = `title->>${lang}`;
+      sortOptions = { ascending: true };
+      break;
+    // El caso por defecto es 'date_desc'
+    default:
+      sortColumn = 'created_at';
+      sortOptions = { ascending: false };
+      break;
+  }
+
+  // 3. Aplicamos el ordenamiento a la consulta
+  query = query.order(sortColumn, sortOptions);
+
   const { data, error, count } = await query;
   
   if (error) {
@@ -93,7 +99,6 @@ export async function getPublicJobs(language = "es", options = {}) {
   }
   return { data, count };
 }
-
 
 export async function getJobById(id, language = "es") {
   const lang = ["es", "en"].includes(language) ? language : "es";
@@ -123,7 +128,6 @@ export async function getJobById(id, language = "es") {
   return data;
 }
 
-// NUEVA FUNCIÓN: Para las páginas de políticas y términos.
 export async function getLegalDocument(slug, language = 'es') {
   const lang = ["es", "en"].includes(language) ? language : "es";
   const { data, error } = await supabase
@@ -138,9 +142,6 @@ export async function getLegalDocument(slug, language = 'es') {
   }
   return data;
 }
-
-
-// --- QUERIES DEL DASHBOARD (ADMIN) ---
 
 export async function getUserProfile(userId) {
   if (!userId) return null;
@@ -157,6 +158,8 @@ export async function getUserProfile(userId) {
 
   return data;
 }
+
+// --- QUERIES PRIVADAS ---
 
 export async function getAllJobsForAdmin() {
   const { data, error } = await supabase
@@ -179,4 +182,3 @@ export async function getAllJobsForAdmin() {
   return data;
 }
 
-// Aquí añadiremos el resto de funciones del dashboard (leads, companies, etc.) a medida que las necesitemos.

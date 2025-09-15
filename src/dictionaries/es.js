@@ -55,6 +55,9 @@ export const dictionary = {
     showingResults: "Mostrando {start}-{end} de {total} empleos",
     sort: "Ordenar por:",
     mostRelevant: "Más Relevante",
+    mostRecent: "Más Reciente",
+    highestSalary: "Salario (mayor a menor)",
+    titleAZ: "Título (A-Z)",
   },
   companiesPage: {
     heroTitle: "El Socio Estratégico para tu Equipo de Trabajo",
@@ -78,6 +81,63 @@ export const dictionary = {
   },
   footer: {
     adminLogin: "Admin Login",
+  },
+    resourcesPage: {
+    heroTitle: "Impulsa tu Carrera con Nuestros Recursos",
+    heroSubtitle: "Desde perfeccionar tu CV hasta dominar la entrevista, te acompañamos en cada paso.",
+    tips: [
+      {
+        id: 1,
+        title: "Optimiza tu CV y Carta de Presentación",
+        description: "Aprende a crear documentos que capturen la atención de los reclutadores y te abran las puertas a nuevas oportunidades.",
+        iconName: 'FaFileAlt',
+        imageUrl: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?q=80&w=1770',
+        readMore: "Leer más",
+        extendedContent: {
+          heading1: "Puntos Clave:",
+          points1: [
+            "Adapta tu CV: Personaliza tu CV para cada oferta, destacando la experiencia y habilidades más relevantes.",
+            "Usa Palabras Clave: Integra términos de la descripción del puesto para pasar los filtros automáticos (ATS).",
+            "Cuantifica Logros: En lugar de 'Responsable de ventas', usa 'Incrementé las ventas un 15% en 6 meses'. Los números son poderosos."
+          ],
+          heading2: "Verbos de Acción para Impresionar:",
+          paragraph1: "Utiliza palabras como: Lideré, Optimicé, Implementé, Aumenté, Desarrollé, Gestioné, Creé."
+        }
+      },
+      {
+        id: 2,
+        title: "Prepárate para el Éxito en tus Entrevistas",
+        description: "La confianza es clave. Con nuestras guías, estarás listo para cualquier pregunta y dejarás una impresión memorable.",
+        iconName: 'FaUserTie',
+        imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1770',
+        readMore: "Leer más",
+        extendedContent: {
+          heading1: "Fases de la Preparación:",
+          points1: [
+            "Investigación: Conoce la empresa, su cultura, productos y a tu entrevistador. Demuestra interés genuino.",
+            "Practica (Método STAR): Prepara respuestas usando el método Situación, Tarea, Acción, Resultado. Es ideal para preguntas de comportamiento.",
+            "Prepara Preguntas Inteligentes: Ten listas 2-3 preguntas que demuestren tu interés en el rol, el equipo o la empresa."
+          ]
+        }
+      },
+      {
+        id: 3,
+        title: "Consejos para el Proceso de Contratación",
+        description: "Te guiamos a través de los últimos pasos para que la transición a tu nuevo empleo sea lo más fluida posible.",
+        iconName: 'FaHandshake',
+        imageUrl: '/tip-3.webp',
+        readMore: "Leer más",
+        extendedContent: {
+          heading1: "Lista de Verificación Final:",
+          points1: [
+            "Entiende la Oferta: Analiza el salario, beneficios, responsabilidades y oportunidades de crecimiento.",
+            "Negociación: Conoce tu valor en el mercado. No tengas miedo de negociar, pero hazlo de forma profesional y justificada.",
+            "Onboarding: Durante tus primeras semanas, enfócate en aprender, conocer a tu equipo y demostrar una actitud proactiva."
+          ],
+          heading2: "Errores a Evitar:",
+          paragraph1: "No dejes de hacer preguntas, no critiques a empleadores anteriores y no olvides enviar una nota de agradecimiento."
+        }
+      }
+    ]
   }
-
 };

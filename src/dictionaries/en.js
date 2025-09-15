@@ -51,6 +51,9 @@ export const dictionary = {
     showingResults: "Showing {start}-{end} of {total} jobs",
     sort: "Sort by:",
     mostRelevant: "Most Relevant",
+    mostRecent: "Most Recent",
+    highestSalary: "Salary (Highest First)",
+    titleAZ: "Title (A-Z)",
   },
   companiesPage: {
     heroTitle: "The Strategic Partner for Your Workforce",
@@ -74,5 +77,63 @@ export const dictionary = {
   },
   footer: {
     adminLogin: "Admin Login",
+  },
+  resourcesPage: {
+    heroTitle: "Boost Your Career with Our Resources",
+    heroSubtitle: "From perfecting your resume to mastering the interview, we support you every step of the way.",
+    tips: [
+      {
+        id: 1,
+        title: "Optimize Your CV and Cover Letter",
+        description: "Learn to create documents that capture recruiters' attention and open doors to new opportunities.",
+        iconName: 'FaFileAlt',
+        imageUrl: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?q=80&w=1770',
+        readMore: "Read More",
+        extendedContent: {
+          heading1: "Key Points:",
+          points1: [
+            "Tailor Your CV: Customize your CV for each application, highlighting the most relevant experience and skills.",
+            "Use Keywords: Integrate terms from the job description to pass through automated filters (ATS).",
+            "Quantify Achievements: Instead of 'Responsible for sales,' use 'Increased sales by 15% in 6 months.' Numbers are powerful."
+          ],
+          heading2: "Action Verbs to Impress:",
+          paragraph1: "Use words like: Led, Optimized, Implemented, Increased, Developed, Managed, Created."
+        }
+      },
+      {
+        id: 2,
+        title: "Prepare for Success in Your Interviews",
+        description: "Confidence is key. With our guides, you'll be ready for any question and leave a memorable impression.",
+        iconName: 'FaUserTie',
+        imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1770',
+        readMore: "Read More",
+        extendedContent: {
+          heading1: "Preparation Phases:",
+          points1: [
+            "Research: Know the company, its culture, products, and your interviewer. Show genuine interest.",
+            "Practice (STAR Method): Prepare answers using the Situation, Task, Action, Result method. It's ideal for behavioral questions.",
+            "Prepare Smart Questions: Have 2-3 questions ready that show your interest in the role, the team, or the company."
+          ]
+        }
+      },
+      {
+        id: 3,
+        title: "Tips for the Hiring Process",
+        description: "We guide you through the final steps to make the transition to your new job as smooth as possible.",
+        iconName: 'FaHandshake',
+        imageUrl: '/tip-3.webp',
+        readMore: "Read More",
+        extendedContent: {
+          heading1: "Final Checklist:",
+          points1: [
+            "Understand the Offer: Analyze the salary, benefits, responsibilities, and growth opportunities.",
+            "Negotiation: Know your market value. Don't be afraid to negotiate, but do it professionally and with justification.",
+            "Onboarding: During your first weeks, focus on learning, getting to know your team, and showing a proactive attitude."
+          ],
+          heading2: "Mistakes to Avoid:",
+          paragraph1: "Don't stop asking questions, don't criticize previous employers, and don't forget to send a thank-you note."
+        }
+      }
+    ]
   }
 };

@@ -36,7 +36,7 @@ export default async function ContactSection({ dict, lang }) {
   const text = content[lang] || content['es'];
 
   return (
-    <section className="relative z-10 py-20 px-8 bg-dark-background">
+    <section id="contact-form" className="relative z-10 py-20 px-8 bg-dark-background">
       <div className="max-w-4xl mx-auto">
         <div className="text-center">
             <h2 className="text-4xl font-bold text-dark-text mb-4">{text.contactTitle}</h2>
