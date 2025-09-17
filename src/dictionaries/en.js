@@ -50,6 +50,9 @@ export const dictionary = {
     aboutUsP1: "WG Labor LLC was born from the vision of creating a more efficient and humane bridge between companies seeking talent and professionals desiring flexibility and growth opportunities.",
     aboutUsP2: "Our mission is simple: to be the most trusted strategic partner for our clients and a source of valuable opportunities for our candidates.",
     aboutUsImageAlt: "The WG Labor team collaborating in a strategy meeting",
+    companiesBenefit1: "Rigorous selection process.",
+    companiesBenefit2: "Access to a wide network of talent.",
+    companiesBenefit3: "Flexible and tailor-made solutions.",
   },
   jobs: {
     showingResults: "Showing {start}-{end} of {total} jobs",

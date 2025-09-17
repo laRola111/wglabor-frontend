@@ -17,6 +17,8 @@ export default async function ContactSection({ dict, lang }) {
       messageLabel: "Mensaje",
       sendButton: "Enviar Mensaje",
       sending: "Enviando...",
+      alert: "*Se requiere al menos un correo electrónico o un teléfono.",
+      phone: "Telefono"
     },
     en: {
       contactTitle: "Interested in our services?",
@@ -30,6 +32,8 @@ export default async function ContactSection({ dict, lang }) {
       messageLabel: "Message",
       sendButton: "Send Message",
       sending: "Sending...",
+      alert: "*At least one email or phone number is required.",
+      phone: "Phone",
     }
   }
   

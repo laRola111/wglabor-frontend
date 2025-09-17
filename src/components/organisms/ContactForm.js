@@ -46,13 +46,13 @@ export default function ContactForm({ dict }) {
           <Input id="email" name="email" type="email" className="mt-1 w-full" />
         </div>
         <div>
-          <Label htmlFor="phone">Teléfono</Label>
+          <Label htmlFor="phone">{dict.phone}</Label>
           {/* Se añade el nuevo campo de teléfono */}
           <Input id="phone" name="phone" type="tel" className="mt-1 w-full" />
         </div>
       </div>
       <p className="text-xs text-center text-dark-text-muted -mt-4">
-        * Se requiere al menos un correo electrónico o un teléfono.
+        {dict.alert}
       </p>
 
       <div>

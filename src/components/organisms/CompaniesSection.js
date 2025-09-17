@@ -1,5 +1,5 @@
 // RUTA: src/components/organisms/CompaniesSection.js
-"use client"; // <-- Convertimos a Componente de Cliente para manejar onClick
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +7,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import Button from "../ui/Button";
 
 export default function CompaniesSection({ dict, lang }) {
-  // El contenido del diccionario se obtiene de 'home'
+  // El contenido del diccionario se sigue obteniendo de 'home'
   const text = dict.home;
 
   const handleScrollToContact = (event) => {
@@ -29,18 +29,19 @@ export default function CompaniesSection({ dict, lang }) {
             {text.companiesDescription}
           </p>
 
+          {/* AHORA LOS TEXTOS VIENEN DEL DICCIONARIO */}
           <ul className="space-y-4 mb-10">
             <li className="flex items-center text-dark-text-muted">
               <FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" />
-              <span>Proceso de selección riguroso.</span>
+              <span>{text.companiesBenefit1}</span>
             </li>
             <li className="flex items-center text-dark-text-muted">
               <FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" />
-              <span>Acceso a una amplia red de talento.</span>
+              <span>{text.companiesBenefit2}</span>
             </li>
             <li className="flex items-center text-dark-text-muted">
               <FaCheckCircle className="text-accent-primary mr-3 flex-shrink-0" />
-              <span>Soluciones flexibles y a la medida.</span>
+              <span>{text.companiesBenefit3}</span>
             </li>
           </ul>
 
