@@ -50,6 +50,10 @@ export const dictionary = {
     
     startSearching: "Empieza a buscar empleo",
     browseJobs: "Explora todas las ofertas",
+    aboutUsTitle: "Sobre Nosotros",
+    aboutUsP1: "WG Labor LLC nació de la visión de crear un puente más eficiente y humano entre las empresas que buscan talento y los profesionales que desean flexibilidad y oportunidades de crecimiento.",
+    aboutUsP2: "Nuestra misión es simple: ser el socio estratégico más confiable para nuestros clientes y una fuente de oportunidades valiosas para nuestros candidatos.",
+    aboutUsImageAlt: "Equipo de WG Labor colaborando en una reunión de estrategia",
   },
   jobs: {
     showingResults: "Mostrando {start}-{end} de {total} empleos",

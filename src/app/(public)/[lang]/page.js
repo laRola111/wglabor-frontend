@@ -77,7 +77,7 @@ export default async function Home({ params: { lang } }) {
 
       {/* 3. El resto de las secciones están fuera, sobre el fondo normal */}
       <AnimatedSection>
-        <AboutUsSection dict={{ lang }} />
+        <AboutUsSection dict={dict.home} />
       </AnimatedSection>
       <AnimatedSection>
         <CompaniesSection dict={dict} lang={lang} />
