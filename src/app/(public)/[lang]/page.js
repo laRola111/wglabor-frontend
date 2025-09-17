@@ -34,11 +34,8 @@ export default async function Home({ params: { lang } }) {
 
   return (
     <>
-      {/* 1. Contenedor principal para el efecto parallax */}
-      <div className="parallax-section-wrapper">
-        {/* Hero Section (ahora sin clase de fondo propia) */}
-        <section className="relative z-10 py-24 px-8 text-center">
-          <div className="max-w-4xl mx-auto">
+     <section className="relative z-10 py-24 px-8 text-center bg-gradient-to-r from-dark-background via-dark-surface to-dark-background animate-gradient-slow">
+        <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl font-extrabold text-white leading-tight mb-4">
               {dict.home.heroTitle}
             </h1>
@@ -73,7 +70,7 @@ export default async function Home({ params: { lang } }) {
             )}
           </div>
         </AnimatedSection>
-      </div>
+            
 
       {/* 3. El resto de las secciones están fuera, sobre el fondo normal */}
       <AnimatedSection>
